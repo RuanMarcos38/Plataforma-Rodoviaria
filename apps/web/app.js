@@ -23,10 +23,10 @@ const state = {
 
 const views = {
   control: "Torre de controle nacional",
-  marketplace: "Marketplace nacional de fretes",
-  matching: "Smart Freight Match",
-  trips: "Central de viagens e tracking",
-  fiscal: "Operacao fiscal e regulatoria",
+  marketplace: "Mercado nacional de fretes",
+  matching: "Alocação inteligente de fretes",
+  trips: "Central de viagens e rastreamento",
+  fiscal: "Operação fiscal e regulatória",
   finance: "Financeiro e pagamentos protegidos",
   admin: "Painel administrador"
 };
@@ -35,14 +35,14 @@ const statusLabels = {
   DRAFT: "Rascunho",
   PUBLISHED: "Publicado",
   MATCHING: "Buscando motorista",
-  NEGOTIATING: "Em negociacao",
+  NEGOTIATING: "Em negociação",
   ACCEPTED: "Aceito",
-  DOCUMENTATION: "Documentacao",
+  DOCUMENTATION: "Documentação",
   SCHEDULED_PICKUP: "Coleta agendada",
   EN_ROUTE_PICKUP: "Indo para coleta",
   AT_PICKUP: "Na coleta",
   LOADING: "Carregando",
-  IN_TRANSIT: "Em transito",
+  IN_TRANSIT: "Em trânsito",
   AT_DESTINATION: "No destino",
   UNLOADING: "Descarregando",
   DELIVERED: "Entregue",
@@ -50,7 +50,87 @@ const statusLabels = {
   SETTLEMENT_PENDING: "Pagamento pendente",
   CLOSED: "Encerrado",
   CANCELLED: "Cancelado",
-  INCIDENT: "Ocorrencia"
+  INCIDENT: "Ocorrência"
+};
+
+const offerStatusLabels = {
+  sent: "Enviada",
+  accepted: "Aceita",
+  superseded: "Substituída"
+};
+
+const fiscalStatusLabels = {
+  authorized: "Autorizado",
+  pending: "Pendente"
+};
+
+const paymentStatusLabels = {
+  escrow: "Protegido em garantia",
+  pending: "Pendente",
+  paid: "Pago"
+};
+
+const paymentMethodLabels = {
+  PIX: "PIX",
+  boleto: "Boleto"
+};
+
+const contractStatusLabels = {
+  active: "Ativo",
+  closed: "Encerrado",
+  cancelled: "Cancelado"
+};
+
+const environmentLabels = {
+  homologacao: "Homologação",
+  producao: "Produção"
+};
+
+const vehicleLabels = {
+  truck: "Truck",
+  toco: "Toco",
+  carreta: "Carreta"
+};
+
+const bodyLabels = {
+  bau: "Baú",
+  sider: "Sider",
+  refrigerado: "Refrigerado",
+  graneleiro: "Graneleiro"
+};
+
+const documentStatusLabels = {
+  valid: "Documentos válidos",
+  review: "Documentos em revisão"
+};
+
+const rntrcStatusLabels = {
+  active: "RNTRC ativo",
+  pending: "RNTRC pendente"
+};
+
+const riskLevelLabels = {
+  baixo: "Baixo",
+  medio: "Médio",
+  alto: "Alto"
+};
+
+const auditActionLabels = {
+  bootstrap: "Sistema iniciado",
+  "freight:create": "Carga criada",
+  "driver:create": "Motorista cadastrado",
+  "offer:create": "Proposta enviada",
+  "contract:create": "Contrato criado",
+  "trip:advance": "Viagem atualizada",
+  "tracking:ping": "Ping de rastreamento",
+  "fiscal:authorize": "Documento autorizado",
+  "payment:settle": "Pagamento liquidado",
+  "incident:create": "Ocorrência registrada",
+  "brand:update": "Marca atualizada"
+};
+
+const auditEntityLabels = {
+  workspace: "Ambiente do sistema"
 };
 
 const nextByStatus = {
@@ -80,6 +160,7 @@ const fallbackIcons = {
   "badge-check": "v",
   "file-check-2": "F",
   handshake: "=",
+  info: "i",
   landmark: "$",
   "list-checks": "#",
   "map-pinned": "M",
@@ -119,6 +200,10 @@ const elements = {
 
 function money(value) {
   return formatter.format(Number(value || 0));
+}
+
+function labelFrom(map, value) {
+  return map[value] || value || "";
 }
 
 function escapeHtml(value) {
@@ -204,7 +289,7 @@ function setBrand(brand) {
   if (!brand) return;
   document.documentElement.style.setProperty("--primary", brand.primaryColor || "#0f5f63");
   document.documentElement.style.setProperty("--accent", brand.accentColor || "#f97316");
-  elements.brandName.textContent = brand.appName || "R2R Logistica";
+  elements.brandName.textContent = brand.appName || "R2R Logística";
 }
 
 function syncChromePermissions() {
@@ -314,10 +399,33 @@ function renderKpis() {
   };
   return `
     <section class="kpi-grid">
-      ${kpi("Fretes abertos", d.openFreights, `${d.driversAvailable} motoristas disponiveis`)}
+      ${kpi("Fretes abertos", d.openFreights, `${d.driversAvailable} motoristas disponíveis`)}
       ${kpi("Viagens ativas", d.activeTrips, `${d.delayedTrips} com alerta`)}
-      ${kpi("Pendencias fiscais", d.fiscalPending, "CT-e, MDF-e, CIOT")}
+      ${kpi("Pendências fiscais", d.fiscalPending, "CT-e, MDF-e, CIOT")}
       ${kpi("Receita monitorada", money(d.revenue), `${d.otif}% OTIF`)}
+    </section>
+  `;
+}
+
+function renderControlHero() {
+  const activeTenant = state.bootstrap.tenants.find((tenant) => tenant.id === state.tenantId);
+  const brandName = activeTenant?.brand?.appName || "R2R Logística";
+
+  return `
+    <section class="control-hero" aria-label="Logística invisível">
+      <div class="hero-brand">
+        <span class="hero-brand-mark" aria-hidden="true"><span></span></span>
+        <strong>${escapeHtml(brandName)}</strong>
+      </div>
+      <div class="hero-copy">
+        <h2><span>Logística</span><span>Invisível</span></h2>
+        <p>O que acontece enquanto sua carga viaja?</p>
+      </div>
+      <div class="hero-insight">
+        <span class="hero-insight-icon"><i data-lucide="package-search"></i></span>
+        <p>Por trás de cada entrega, há uma operação monitorada minuto a minuto.</p>
+      </div>
+      <div class="hero-corner" aria-hidden="true"></div>
     </section>
   `;
 }
@@ -325,20 +433,21 @@ function renderKpis() {
 function renderControl() {
   const pins = state.trips.slice(0, 3);
   elements.content.innerHTML = `
+    ${renderControlHero()}
     ${renderKpis()}
     <section class="two-column">
       <div class="panel">
         <div class="panel-header">
           <div>
             <p class="eyebrow">Mapa operacional</p>
-            <h2>Cargas, veiculos e alertas em tempo real</h2>
+            <h2>Cargas, veículos e alertas em tempo real</h2>
           </div>
           <button class="secondary-button" type="button" data-action="refresh">
             <i data-lucide="refresh-cw"></i>
             Atualizar
           </button>
         </div>
-        <div class="control-map" aria-label="Mapa operacional simulado">
+        <div class="control-map" aria-label="Mapa operacional">
           <div class="route-line"></div>
           ${pins
             .map(
@@ -357,8 +466,8 @@ function renderControl() {
       <div class="panel">
         <div class="panel-header">
           <div>
-            <p class="eyebrow">Fila critica</p>
-            <h2>Operacoes para decidir</h2>
+            <p class="eyebrow">Fila crítica</p>
+            <h2>Operações para decidir</h2>
           </div>
         </div>
         <div class="lane-list">
@@ -374,7 +483,7 @@ function renderFreightCard(freight) {
     ? `
         <button class="secondary-button" type="button" data-select-freight="${freight.id}" data-target-view="matching">
           <i data-lucide="route"></i>
-          Ver matching
+          Ver alocação
         </button>
       `
     : "";
@@ -386,8 +495,8 @@ function renderFreightCard(freight) {
         <span class="status-pill ${statusClass(freight.status)}">${escapeHtml(statusLabels[freight.status] || freight.status)}</span>
       </div>
       <div>
-        <h3>${escapeHtml(freight.origin.city)}/${escapeHtml(freight.origin.uf)} -> ${escapeHtml(freight.destination.city)}/${escapeHtml(freight.destination.uf)}</h3>
-        <p class="muted">${escapeHtml(freight.cargo)} · ${numberFormatter.format(freight.weightKg)} kg · ${escapeHtml(freight.requiredBody)}</p>
+        <h3>${escapeHtml(freight.origin.city)}/${escapeHtml(freight.origin.uf)} → ${escapeHtml(freight.destination.city)}/${escapeHtml(freight.destination.uf)}</h3>
+        <p class="muted">${escapeHtml(freight.cargo)} · ${numberFormatter.format(freight.weightKg)} kg · ${escapeHtml(labelFrom(bodyLabels, freight.requiredBody))}</p>
       </div>
       <div class="tag-row">
         <span class="tag">${money(freight.price)}</span>
@@ -407,7 +516,7 @@ function renderMarketplace() {
       <div class="panel-header">
         <div>
           <p class="eyebrow">Fretes publicados</p>
-          <h2>Busca e contratacao</h2>
+          <h2>Busca e contratação</h2>
         </div>
         ${
           can("freight:create")
@@ -440,7 +549,7 @@ function renderMarketplace() {
               <th>Coleta</th>
               <th>Valor</th>
               <th>Status</th>
-              <th>Acao</th>
+              <th>Ação</th>
             </tr>
           </thead>
           <tbody>
@@ -450,8 +559,8 @@ function renderMarketplace() {
                   <tr>
                     <td><strong>${escapeHtml(freight.id)}</strong><br /><span class="muted">${escapeHtml(freight.shipper)}</span></td>
                     <td>${escapeHtml(freight.origin.city)}/${escapeHtml(freight.origin.uf)}<br />${escapeHtml(freight.destination.city)}/${escapeHtml(freight.destination.uf)}</td>
-                    <td>${escapeHtml(freight.cargo)}<br /><span class="muted">${numberFormatter.format(freight.weightKg)} kg · ${escapeHtml(freight.requiredVehicle)}</span></td>
-                    <td>${escapeHtml(freight.pickupWindow)}<br /><span class="muted">ETA ${escapeHtml(freight.deliveryEta)}</span></td>
+                    <td>${escapeHtml(freight.cargo)}<br /><span class="muted">${numberFormatter.format(freight.weightKg)} kg · ${escapeHtml(labelFrom(vehicleLabels, freight.requiredVehicle))}</span></td>
+                    <td>${escapeHtml(freight.pickupWindow)}<br /><span class="muted">Previsão ${escapeHtml(freight.deliveryEta)}</span></td>
                     <td><strong>${money(freight.price)}</strong><br /><span class="muted">Custo ${money(freight.estimate.subtotal)}</span></td>
                     <td><span class="status-pill ${statusClass(freight.status)}">${escapeHtml(statusLabels[freight.status] || freight.status)}</span></td>
                     <td>
@@ -491,13 +600,13 @@ function filterOption(value, label, activeValue) {
 function renderMatching() {
   const selected = state.freights.find((freight) => freight.id === state.selectedFreightId) || state.freights[0];
   if (!selected) {
-    elements.content.innerHTML = empty("Cadastre uma carga para iniciar o matching.");
+    elements.content.innerHTML = empty("Cadastre uma carga para iniciar a alocação inteligente.");
     return;
   }
 
   const driverList = can("driver:read")
-    ? state.drivers.map((driver) => renderDriverCard(driver, selected)).join("") || empty("Nenhum motorista compativel.")
-    : empty("Este perfil pode acompanhar cargas, mas nao acessa o ranking de motoristas.");
+    ? state.drivers.map((driver) => renderDriverCard(driver, selected)).join("") || empty("Nenhum motorista compatível.")
+    : empty("Este perfil pode acompanhar cargas, mas não acessa o ranking de motoristas.");
   const offers = state.offers.filter((offer) => offer.freightId === selected.id);
 
   elements.content.innerHTML = `
@@ -514,9 +623,9 @@ function renderMatching() {
         </div>
         ${renderFreightCard(selected)}
         <div class="finance-grid" style="margin-top: 12px;">
-          <div class="finance-card"><small class="muted">Preco sugerido</small><strong>${money(selected.estimate.suggestedPrice)}</strong></div>
+          <div class="finance-card"><small class="muted">Preço sugerido</small><strong>${money(selected.estimate.suggestedPrice)}</strong></div>
           <div class="finance-card"><small class="muted">Custo por km</small><strong>${money(selected.estimate.costPerKm)}</strong></div>
-          <div class="finance-card"><small class="muted">Pedagios</small><strong>${money(selected.tolls)}</strong></div>
+          <div class="finance-card"><small class="muted">Pedágios</small><strong>${money(selected.tolls)}</strong></div>
         </div>
       </div>
 
@@ -535,8 +644,8 @@ function renderMatching() {
     <section class="panel">
       <div class="panel-header">
         <div>
-          <p class="eyebrow">Negociacao</p>
-          <h2>Propostas e contratacao</h2>
+          <p class="eyebrow">Negociação</p>
+          <h2>Propostas e contratação</h2>
         </div>
       </div>
       <div class="table-wrap">
@@ -548,7 +657,7 @@ function renderMatching() {
               <th>Valor</th>
               <th>Status</th>
               <th>Mensagem</th>
-              <th>Acao</th>
+              <th>Ação</th>
             </tr>
           </thead>
           <tbody>
@@ -576,7 +685,7 @@ function renderOfferRow(offer) {
       <td><strong>${escapeHtml(offer.id)}</strong></td>
       <td>${escapeHtml(offer.driverName)}</td>
       <td>${money(offer.amount)}</td>
-      <td><span class="status-pill ${offer.status === "sent" ? "warning" : ""}">${escapeHtml(offer.status)}</span></td>
+      <td><span class="status-pill ${offer.status === "sent" ? "warning" : ""}">${escapeHtml(labelFrom(offerStatusLabels, offer.status))}</span></td>
       <td>${escapeHtml(offer.message)}</td>
       <td>
         ${
@@ -605,8 +714,8 @@ function renderDriverCard(driver, freight) {
         </div>
         <p class="muted">${escapeHtml(driver.city)}/${escapeHtml(driver.uf)} · ${driver.distanceToPickupKm} km da coleta · ${escapeHtml(driver.vehiclePlate)}</p>
         <div class="tag-row">
-          <span class="tag">${escapeHtml(driver.documentsStatus === "valid" ? "Docs validos" : "Docs em revisao")}</span>
-          <span class="tag">${escapeHtml(driver.rntrcStatus === "active" ? "RNTRC ativo" : "RNTRC pendente")}</span>
+          <span class="tag">${escapeHtml(labelFrom(documentStatusLabels, driver.documentsStatus))}</span>
+          <span class="tag">${escapeHtml(labelFrom(rntrcStatusLabels, driver.rntrcStatus))}</span>
           <span class="tag">Nota ${driver.rating}</span>
         </div>
         <div class="record-actions" style="margin-top: 10px;">
@@ -616,7 +725,7 @@ function renderDriverCard(driver, freight) {
                   <i data-lucide="handshake"></i>
                   Enviar proposta
                 </button>`
-              : `<span class="muted">Sem permissao para proposta</span>`
+              : `<span class="muted">Sem permissão para proposta</span>`
           }
         </div>
       </div>
@@ -632,7 +741,7 @@ function renderTrips() {
     <section class="panel">
       <div class="panel-header">
         <div>
-          <p class="eyebrow">Historico da viagem</p>
+          <p class="eyebrow">Histórico da viagem</p>
           <h2>${escapeHtml(state.selectedTripId || "Selecione uma viagem")}</h2>
         </div>
       </div>
@@ -654,12 +763,12 @@ function renderTripStage(trip) {
       <div class="progress-track" aria-label="Progresso da viagem">
         <span style="width: ${trip.progress}%"></span>
       </div>
-      <p class="muted" style="margin-top: 10px;">Ultimo ping: ${escapeHtml(trip.lastPing.city)}/${escapeHtml(trip.lastPing.uf)} · ${escapeHtml(trip.lastPing.at)}</p>
+      <p class="muted" style="margin-top: 10px;">Último ping: ${escapeHtml(trip.lastPing.city)}/${escapeHtml(trip.lastPing.uf)} · ${escapeHtml(trip.lastPing.at)}</p>
       ${trip.alerts.map((alert) => `<p class="notice">${escapeHtml(alert.text)}</p>`).join("")}
       <div class="record-actions">
         <button class="secondary-button" type="button" data-select-trip="${trip.id}">
           <i data-lucide="list-checks"></i>
-          Timeline
+          Histórico
         </button>
         ${
           nextStatus
@@ -684,7 +793,7 @@ function renderTripStage(trip) {
 
 function renderTimeline() {
   const trip = state.trips.find((item) => item.id === state.selectedTripId) || state.trips[0];
-  if (!trip) return empty("Sem historico.");
+  if (!trip) return empty("Sem histórico.");
 
   return `
     <div class="timeline">
@@ -710,8 +819,8 @@ function renderFiscal() {
     <section class="panel">
       <div class="panel-header">
         <div>
-          <p class="eyebrow">Homologacao fiscal</p>
-          <h2>CT-e, MDF-e, CIOT e Vale-Pedagio</h2>
+          <p class="eyebrow">Homologação fiscal</p>
+          <h2>CT-e, MDF-e, CIOT e Vale-Pedágio</h2>
         </div>
       </div>
       <div class="table-wrap">
@@ -724,7 +833,7 @@ function renderFiscal() {
               <th>Ambiente</th>
               <th>Status</th>
               <th>Protocolo</th>
-              <th>Acao</th>
+              <th>Ação</th>
             </tr>
           </thead>
           <tbody>
@@ -735,8 +844,8 @@ function renderFiscal() {
                     <td><strong>${escapeHtml(doc.type)}</strong><br /><span class="muted">${escapeHtml(doc.id)}</span></td>
                     <td>${escapeHtml(doc.tripId)}</td>
                     <td>${escapeHtml(doc.key)}</td>
-                    <td>${escapeHtml(doc.environment)}</td>
-                    <td><span class="status-pill ${doc.status === "authorized" ? "" : "warning"}">${escapeHtml(doc.status)}</span></td>
+                    <td>${escapeHtml(labelFrom(environmentLabels, doc.environment))}</td>
+                    <td><span class="status-pill ${doc.status === "authorized" ? "" : "warning"}">${escapeHtml(labelFrom(fiscalStatusLabels, doc.status))}</span></td>
                     <td>${escapeHtml(doc.protocol || "Aguardando")}</td>
                     <td>
                       ${
@@ -745,7 +854,7 @@ function renderFiscal() {
                               <i data-lucide="file-check-2"></i>
                               Autorizar
                             </button>`
-                          : `<span class="muted">Sem acao</span>`
+                          : `<span class="muted">Sem ação</span>`
                       }
                     </td>
                   </tr>
@@ -757,9 +866,9 @@ function renderFiscal() {
       </div>
     </section>
     <section class="panel">
-      <p class="eyebrow">Regra de seguranca</p>
-      <h2>Integracoes oficiais ficam desacopladas</h2>
-      <p class="muted">Este MVP registra estados e estrutura de documentos em homologacao. Em producao, certificados digitais, SEFAZ, ANTT, CIOT, RNTRC e provedores de Vale-Pedagio devem usar cofres de segredo, auditoria e idempotencia.</p>
+      <p class="eyebrow">Regra de segurança</p>
+      <h2>Integrações oficiais ficam desacopladas</h2>
+      <p class="muted">Este MVP registra estados e estrutura de documentos em homologação. Em produção, certificados digitais, SEFAZ, ANTT, CIOT, RNTRC e provedores de Vale-Pedágio devem usar cofres de segredo, auditoria e idempotência.</p>
     </section>
   `;
 }
@@ -779,7 +888,7 @@ function renderFinance() {
       <div class="panel-header">
         <div>
           <p class="eyebrow">Pagamentos</p>
-          <h2>Controle com idempotencia</h2>
+          <h2>Controle com idempotência</h2>
         </div>
       </div>
       <div class="table-wrap">
@@ -788,11 +897,11 @@ function renderFinance() {
             <tr>
               <th>ID</th>
               <th>Viagem</th>
-              <th>Metodo</th>
+              <th>Método</th>
               <th>Valor</th>
               <th>Status</th>
-              <th>Idempotencia</th>
-              <th>Acao</th>
+              <th>Idempotência</th>
+              <th>Ação</th>
             </tr>
           </thead>
           <tbody>
@@ -802,9 +911,9 @@ function renderFinance() {
                   <tr>
                     <td><strong>${escapeHtml(payment.id)}</strong></td>
                     <td>${escapeHtml(payment.tripId)}</td>
-                    <td>${escapeHtml(payment.method)}</td>
+                    <td>${escapeHtml(labelFrom(paymentMethodLabels, payment.method))}</td>
                     <td>${money(payment.amount)}</td>
-                    <td><span class="status-pill ${payment.status === "pending" ? "warning" : ""}">${escapeHtml(payment.status)}</span></td>
+                    <td><span class="status-pill ${payment.status === "pending" ? "warning" : ""}">${escapeHtml(labelFrom(paymentStatusLabels, payment.status))}</span></td>
                     <td>${escapeHtml(payment.idempotencyKey)}</td>
                     <td>
                       ${
@@ -841,7 +950,7 @@ function renderAdmin() {
             <input name="primaryColor" type="color" value="${escapeHtml(tenant.brand.primaryColor)}" />
           </label>
           <label>
-            Cor de acao
+            Cor de ação
             <input name="accentColor" type="color" value="${escapeHtml(tenant.brand.accentColor)}" />
           </label>
           <div class="span-2">
@@ -852,15 +961,15 @@ function renderAdmin() {
           </div>
         </form>
       `
-    : empty("Este perfil visualiza auditoria, mas nao altera configuracoes do tenant.");
+    : empty("Este perfil visualiza auditoria, mas não altera configurações da empresa.");
 
   elements.content.innerHTML = `
     <section class="admin-grid">
       <div class="panel">
         <div class="panel-header">
           <div>
-            <p class="eyebrow">Multi-tenant</p>
-            <h2>Identidade parametrizavel</h2>
+            <p class="eyebrow">Empresas isoladas</p>
+            <h2>Identidade parametrizável</h2>
           </div>
         </div>
         ${adminControls}
@@ -877,8 +986,8 @@ function renderAdmin() {
             .map(
               (item) => `
                 <article class="record-card">
-                  <strong>${escapeHtml(item.action)}</strong>
-                  <span class="muted">${escapeHtml(item.entity)} · ${new Date(item.at).toLocaleString("pt-BR")}</span>
+                  <strong>${escapeHtml(labelFrom(auditActionLabels, item.action))}</strong>
+                  <span class="muted">${escapeHtml(labelFrom(auditEntityLabels, item.entity))} · ${new Date(item.at).toLocaleString("pt-BR")}</span>
                 </article>
               `
             )
@@ -899,7 +1008,7 @@ function renderAdmin() {
       const currentTenant = state.bootstrap.tenants.find((item) => item.id === state.tenantId);
       currentTenant.brand = brand;
       setBrand(brand);
-      toast("Marca atualizada para este tenant.");
+      toast("Marca atualizada para esta empresa.");
     } catch (error) {
       showNotice(error.message);
     }
@@ -972,7 +1081,7 @@ function bindEvents() {
       });
       elements.freightDialog.close();
       state.view = "marketplace";
-      toast("Carga publicada e enviada ao marketplace.");
+      toast("Carga publicada e enviada ao mercado de fretes.");
       await refreshAndRender();
     } catch (error) {
       showNotice(error.message);
@@ -997,7 +1106,7 @@ function bindEvents() {
       });
       elements.driverDialog.close();
       state.view = "matching";
-      toast("Motorista cadastrado e disponivel para matching.");
+      toast("Motorista cadastrado e disponível para alocação.");
       await refreshAndRender();
     } catch (error) {
       showNotice(error.message);
@@ -1014,7 +1123,7 @@ function bindEvents() {
       });
       elements.incidentDialog.close();
       state.view = "trips";
-      toast("Ocorrencia registrada na torre.");
+      toast("Ocorrência registrada na torre.");
       await refreshAndRender();
     } catch (error) {
       showNotice(error.message);
@@ -1049,7 +1158,7 @@ function bindEvents() {
             freightId: selected.id,
             driverId: offerButton.dataset.offerDriver,
             amount: Number(offerButton.dataset.offerAmount),
-            message: "Proposta enviada com base no Smart Freight Match"
+            message: "Proposta enviada com base na alocação inteligente"
           })
         });
         toast(`Proposta ${offer.id} enviada.`);
@@ -1117,7 +1226,7 @@ function bindEvents() {
             documentId: authorizeButton.dataset.authorizeDoc
           })
         });
-        toast("Documento autorizado em homologacao.");
+        toast("Documento autorizado em homologação.");
         await refreshAndRender();
         return;
       }

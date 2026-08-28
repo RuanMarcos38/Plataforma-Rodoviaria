@@ -62,7 +62,7 @@ function hasPermission(role, permission) {
 
 function assertPermission(role, permission) {
   if (!hasPermission(role, permission)) {
-    throw new Error(`Perfil ${role || "desconhecido"} sem permissao ${permission}`);
+    throw new Error(`Perfil ${role || "desconhecido"} sem permissão ${permission}`);
   }
 }
 

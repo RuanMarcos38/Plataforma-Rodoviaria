@@ -1,6 +1,6 @@
 # Banco de Dados
 
-O MVP ainda nao conecta um banco real. A modelagem abaixo define o alvo PostgreSQL + PostGIS para a proxima etapa.
+O MVP ainda não conecta um banco real. A modelagem abaixo define o alvo PostgreSQL + PostGIS para a próxima etapa.
 
 ## Entidades principais
 
@@ -42,11 +42,11 @@ O MVP ainda nao conecta um banco real. A modelagem abaixo define o alvo PostgreS
 ## Regras
 
 - Toda tabela operacional deve ter `tenant_id`.
-- Dados geograficos devem usar PostGIS.
+- Dados geográficos devem usar PostGIS.
 - Eventos de viagem devem ser append-only.
-- Pagamentos, fiscais, CIOT, MDF-e e CT-e devem usar idempotencia.
-- Dados de documentos e localizacao devem ter retencao e acesso compatíveis com LGPD.
+- Pagamentos, fiscais, CIOT, MDF-e e CT-e devem usar idempotência.
+- Dados de documentos e localização devem ter retenção e acesso compatíveis com LGPD.
 
 ## Isolamento
 
-Nao reutilizar banco, schema, buckets, policies ou functions de outros projetos. Em Supabase, criar projeto ou schema isolado antes de qualquer migracao.
+Não reutilizar banco, schema, buckets, policies ou functions de outros projetos. Em Supabase, criar projeto ou schema isolado antes de qualquer migração.

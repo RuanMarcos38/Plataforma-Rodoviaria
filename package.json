@@ -2,7 +2,7 @@
   "name": "plataforma-rodoviaria",
   "version": "0.1.0",
   "private": true,
-  "description": "MVP local da Plataforma Rodoviaria para marketplace de fretes, TMS, tracking e operacao fiscal.",
+  "description": "MVP local da Plataforma Rodoviária para mercado de fretes, TMS, rastreamento e operação fiscal.",
   "scripts": {
     "start": "node apps/api/server.js",
     "dev": "node apps/api/server.js",

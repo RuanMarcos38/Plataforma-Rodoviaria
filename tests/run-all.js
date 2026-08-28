@@ -4,7 +4,7 @@ const { run } = require("./http.test");
 
 run()
   .then(() => {
-    console.log("Suite completa passou.");
+    console.log("Suíte completa passou.");
   })
   .catch((error) => {
     console.error(error);

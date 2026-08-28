@@ -8,34 +8,34 @@ npm start
 
 Acesse `http://localhost:3000`.
 
-No Windows, quando `node` nao estiver no PATH:
+No Windows, quando `node` não estiver no PATH:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/start-local.ps1
 ```
 
-## Homologacao
+## Homologação
 
-Antes do deploy de homologacao:
+Antes do deploy de homologação:
 
 ```bash
 npm test
 ```
 
-No Windows, quando `node` nao estiver no PATH:
+No Windows, quando `node` não estiver no PATH:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/test-local.ps1
 ```
 
-Validar tambem:
+Validar também:
 
-- variaveis de ambiente;
-- tenant isolado;
-- logs sem dados sensiveis;
+- variáveis de ambiente;
+- empresa isolada;
+- logs sem dados sensíveis;
 - armazenamento separado;
-- integracoes apontando para homologacao.
+- integrações apontando para homologação.
 
-## Producao
+## Produção
 
-Nao promover esta versao para producao com `data/dev-store.json`. A producao exige banco real, autenticacao, storage, filas, monitoramento, homologacoes fiscais/regulatorias e gestao segura de segredos.
+Não promover esta versão para produção com `data/dev-store.json`. A produção exige banco real, autenticação, storage, filas, monitoramento, homologações fiscais/regulatórias e gestão segura de segredos.

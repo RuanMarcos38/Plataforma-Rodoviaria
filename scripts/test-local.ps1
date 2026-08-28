@@ -11,7 +11,7 @@ if ($NodeCommand) {
 }
 
 if (-not (Test-Path -LiteralPath $Node)) {
-  throw "Node.js 20+ nao foi encontrado. Instale Node.js ou execute dentro do Codex com o runtime embutido."
+  throw "Node.js 20+ não foi encontrado. Instale Node.js ou execute dentro do Codex com o runtime embutido."
 }
 
 Set-Location -LiteralPath $Root

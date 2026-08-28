@@ -24,14 +24,14 @@ const STATUS_LABELS = {
   DRAFT: "Rascunho",
   PUBLISHED: "Publicado",
   MATCHING: "Buscando motorista",
-  NEGOTIATING: "Em negociacao",
+  NEGOTIATING: "Em negociação",
   ACCEPTED: "Aceito",
-  DOCUMENTATION: "Documentacao",
+  DOCUMENTATION: "Documentação",
   SCHEDULED_PICKUP: "Coleta agendada",
   EN_ROUTE_PICKUP: "Indo para coleta",
   AT_PICKUP: "Na coleta",
   LOADING: "Carregando",
-  IN_TRANSIT: "Em transito",
+  IN_TRANSIT: "Em trânsito",
   AT_DESTINATION: "No destino",
   UNLOADING: "Descarregando",
   DELIVERED: "Entregue",
@@ -39,7 +39,7 @@ const STATUS_LABELS = {
   SETTLEMENT_PENDING: "Pagamento pendente",
   CLOSED: "Encerrado",
   CANCELLED: "Cancelado",
-  INCIDENT: "Ocorrencia"
+  INCIDENT: "Ocorrência"
 };
 
 const ALLOWED_TRANSITIONS = {
@@ -74,7 +74,7 @@ function nextStatuses(from) {
 
 function assertTransition(from, to) {
   if (!canTransition(from, to)) {
-    throw new Error(`Transicao invalida de ${from} para ${to}`);
+    throw new Error(`Transição inválida de ${from} para ${to}`);
   }
 }
 

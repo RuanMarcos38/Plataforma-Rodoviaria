@@ -9,7 +9,7 @@ function createSeedData() {
       city: "Campinas",
       uf: "SP",
       brand: {
-        appName: process.env.PUBLIC_APP_NAME || "R2R Logistica",
+        appName: process.env.PUBLIC_APP_NAME || "R2R Logística",
         primaryColor: "#0f5f63",
         accentColor: "#f97316"
       }
@@ -18,10 +18,10 @@ function createSeedData() {
       id: "tenant-agrovale",
       name: "Agrovale Alimentos",
       segment: "Embarcador",
-      city: "Ribeirao Preto",
+      city: "Ribeirão Preto",
       uf: "SP",
       brand: {
-        appName: "R2R Logistica",
+        appName: "R2R Logística",
         primaryColor: "#124559",
         accentColor: "#f59e0b"
       }
@@ -33,7 +33,7 @@ function createSeedData() {
       id: "FRT-2408-001",
       tenantId: "tenant-rodonorte",
       shipper: "AgroVale Alimentos",
-      origin: { city: "Ribeirao Preto", uf: "SP", lat: -21.1704, lng: -47.8103 },
+      origin: { city: "Ribeirão Preto", uf: "SP", lat: -21.1704, lng: -47.8103 },
       destination: { city: "Contagem", uf: "MG", lat: -19.9317, lng: -44.0536 },
       cargo: "Alimentos secos paletizados",
       weightKg: 18700,
@@ -45,21 +45,21 @@ function createSeedData() {
       distanceKm: 545,
       tolls: 428,
       pickupWindow: "Hoje, 14:00-17:00",
-      deliveryEta: "Amanha, 09:30",
+      deliveryEta: "Amanhã, 09:30",
       status: "MATCHING",
       riskScore: 34,
       priority: "alta",
       returnOpportunity: true,
       price: 6900,
-      requirements: ["RNTRC ativo", "CRLV valido", "Seguro de carga", "Rastreador online"]
+      requirements: ["RNTRC ativo", "CRLV válido", "Seguro de carga", "Rastreador online"]
     },
     {
       id: "FRT-2408-002",
       tenantId: "tenant-rodonorte",
-      shipper: "MetalSul Industria",
+      shipper: "MetalSul Indústria",
       origin: { city: "Joinville", uf: "SC", lat: -26.3044, lng: -48.8487 },
       destination: { city: "Guarulhos", uf: "SP", lat: -23.4543, lng: -46.5337 },
-      cargo: "Pecas automotivas",
+      cargo: "Peças automotivas",
       weightKg: 9200,
       volumeM3: 39,
       cargoValue: 310000,
@@ -68,8 +68,8 @@ function createSeedData() {
       axles: 3,
       distanceKm: 523,
       tolls: 312,
-      pickupWindow: "Amanha, 08:00-10:00",
-      deliveryEta: "Amanha, 21:00",
+      pickupWindow: "Amanhã, 08:00-10:00",
+      deliveryEta: "Amanhã, 21:00",
       status: "NEGOTIATING",
       riskScore: 46,
       priority: "media",
@@ -81,7 +81,7 @@ function createSeedData() {
       id: "FRT-2408-003",
       tenantId: "tenant-rodonorte",
       shipper: "FrioBrasil",
-      origin: { city: "Itajai", uf: "SC", lat: -26.9101, lng: -48.6705 },
+      origin: { city: "Itajaí", uf: "SC", lat: -26.9101, lng: -48.6705 },
       destination: { city: "Curitiba", uf: "PR", lat: -25.429, lng: -49.2671 },
       cargo: "Carga refrigerada",
       weightKg: 12800,
@@ -93,7 +93,7 @@ function createSeedData() {
       distanceKm: 218,
       tolls: 167,
       pickupWindow: "Hoje, 19:00-22:00",
-      deliveryEta: "Amanha, 06:40",
+      deliveryEta: "Amanhã, 06:40",
       status: "PUBLISHED",
       riskScore: 59,
       priority: "alta",
@@ -107,7 +107,7 @@ function createSeedData() {
       shipper: "Agrovale Alimentos",
       origin: { city: "Uberaba", uf: "MG", lat: -19.7472, lng: -47.9381 },
       destination: { city: "Santos", uf: "SP", lat: -23.9608, lng: -46.3336 },
-      cargo: "Insumos agricolas",
+      cargo: "Insumos agrícolas",
       weightKg: 22400,
       volumeM3: 70,
       cargoValue: 420000,
@@ -117,13 +117,13 @@ function createSeedData() {
       distanceKm: 590,
       tolls: 490,
       pickupWindow: "Sexta, 07:00-12:00",
-      deliveryEta: "Sabado, 18:00",
+      deliveryEta: "Sábado, 18:00",
       status: "PUBLISHED",
       riskScore: 28,
       priority: "media",
       returnOpportunity: true,
       price: 7300,
-      requirements: ["MDF-e", "CIOT", "Vale-pedagio"]
+      requirements: ["MDF-e", "CIOT", "Vale-pedágio"]
     }
   ];
 
@@ -133,7 +133,7 @@ function createSeedData() {
       tenantId: "tenant-rodonorte",
       name: "Carlos Henrique",
       phone: "+55 19 90000-1001",
-      city: "Sertaozinho",
+      city: "Sertãozinho",
       uf: "SP",
       rating: 4.9,
       distanceToPickupKm: 18,
@@ -171,7 +171,7 @@ function createSeedData() {
     {
       id: "DRV-103",
       tenantId: "tenant-rodonorte",
-      name: "Joao Batista",
+      name: "João Batista",
       phone: "+55 11 90000-3303",
       city: "Osasco",
       uf: "SP",
@@ -193,7 +193,7 @@ function createSeedData() {
       tenantId: "tenant-agrovale",
       name: "Paulo Andrade",
       phone: "+55 34 90000-4404",
-      city: "Uberlandia",
+      city: "Uberlândia",
       uf: "MG",
       rating: 4.8,
       distanceToPickupKm: 38,
@@ -218,16 +218,16 @@ function createSeedData() {
       driverId: "DRV-101",
       status: "IN_TRANSIT",
       vehiclePlate: "R2R1A24",
-      route: "Ribeirao Preto/SP -> Contagem/MG",
+      route: "Ribeirão Preto/SP → Contagem/MG",
       eta: "2026-08-29 09:30",
       progress: 58,
       alerts: [],
       timeline: [
         { at: "08:00", status: "PUBLISHED", text: "Frete publicado" },
         { at: "08:05", status: "MATCHING", text: "Motorista recomendado" },
-        { at: "08:10", status: "ACCEPTED", text: "Contratacao aceita" },
+        { at: "08:10", status: "ACCEPTED", text: "Contratação aceita" },
         { at: "08:18", status: "DOCUMENTATION", text: "CIOT preparado" },
-        { at: "09:40", status: "IN_TRANSIT", text: "Carga em transito" }
+        { at: "09:40", status: "IN_TRANSIT", text: "Carga em trânsito" }
       ],
       lastPing: { city: "Franca", uf: "SP", speed: 72, at: "10:48" }
     },
@@ -238,10 +238,10 @@ function createSeedData() {
       driverId: "DRV-102",
       status: "DOCUMENTATION",
       vehiclePlate: "MLO8B12",
-      route: "Joinville/SC -> Guarulhos/SP",
+      route: "Joinville/SC → Guarulhos/SP",
       eta: "2026-08-29 21:00",
       progress: 20,
-      alerts: [{ type: "document", text: "MDF-e aguardando autorizacao" }],
+      alerts: [{ type: "document", text: "MDF-e aguardando autorização" }],
       timeline: [
         { at: "10:05", status: "PUBLISHED", text: "Carga publicada" },
         { at: "10:22", status: "NEGOTIATING", text: "Proposta recebida" },
@@ -256,16 +256,16 @@ function createSeedData() {
       driverId: "DRV-201",
       status: "SCHEDULED_PICKUP",
       vehiclePlate: "PAA3D10",
-      route: "Uberaba/MG -> Santos/SP",
+      route: "Uberaba/MG → Santos/SP",
       eta: "2026-08-30 18:00",
       progress: 8,
       alerts: [],
       timeline: [
-        { at: "07:30", status: "PUBLISHED", text: "Solicitacao criada" },
+        { at: "07:30", status: "PUBLISHED", text: "Solicitação criada" },
         { at: "08:12", status: "ACCEPTED", text: "Transportadora contratada" },
         { at: "09:00", status: "SCHEDULED_PICKUP", text: "Coleta agendada" }
       ],
-      lastPing: { city: "Uberlandia", uf: "MG", speed: 0, at: "10:52" }
+      lastPing: { city: "Uberlândia", uf: "MG", speed: 0, at: "10:52" }
     }
   ];
 

@@ -8,7 +8,7 @@ const { createSeedData } = require("../packages/domain/seed-data");
 function testStateMachine() {
   assert.equal(canTransition("PUBLISHED", "MATCHING"), true);
   assert.equal(canTransition("PUBLISHED", "CLOSED"), false);
-  assert.throws(() => assertTransition("IN_TRANSIT", "CLOSED"), /Transicao invalida/);
+  assert.throws(() => assertTransition("IN_TRANSIT", "CLOSED"), /Transição inválida/);
 }
 
 function testRbac() {
@@ -54,4 +54,4 @@ testFreightEstimate();
 testMatching();
 testTenantIsolation();
 
-console.log("Todos os testes de dominio passaram.");
+console.log("Todos os testes de domínio passaram.");

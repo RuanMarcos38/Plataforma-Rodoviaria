@@ -3,23 +3,23 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>R2R Logistica | Torre Nacional</title>
+    <title>R2R Logística | Torre Nacional</title>
     <meta
       name="description"
-      content="MVP local da Plataforma Rodoviaria para marketplace de fretes, TMS, tracking e operacao fiscal."
+      content="MVP local da Plataforma Rodoviária para mercado de fretes, TMS, rastreamento e operação fiscal."
     />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <div class="app-shell">
-      <aside class="sidebar" aria-label="Navegacao principal">
+      <aside class="sidebar" aria-label="Navegação principal">
         <div class="brand-lockup">
           <div class="brand-mark" aria-hidden="true">
             <span></span>
           </div>
           <div>
-            <strong id="brandName">R2R Logistica</strong>
-            <small>Ecossistema nacional</small>
+            <strong id="brandName">R2R Logística</strong>
+            <small>Logística invisível</small>
           </div>
         </div>
 
@@ -36,11 +36,11 @@
           </button>
           <button class="nav-button" data-view="marketplace" type="button">
             <i data-lucide="package-search"></i>
-            Marketplace
+            Mercado
           </button>
           <button class="nav-button" data-view="matching" type="button">
             <i data-lucide="route"></i>
-            Matching
+            Alocação
           </button>
           <button class="nav-button" data-view="trips" type="button">
             <i data-lucide="truck"></i>
@@ -62,14 +62,14 @@
 
         <div class="sidebar-footer">
           <span class="status-dot"></span>
-          API local em homologacao
+          API local em homologação
         </div>
       </aside>
 
       <main class="workspace">
         <header class="topbar">
           <div>
-            <p class="eyebrow">Operacao rodoviaria integrada</p>
+            <p class="eyebrow">Operação rodoviária integrada</p>
             <h1 id="pageTitle">Torre de controle nacional</h1>
           </div>
 
@@ -88,7 +88,7 @@
             </button>
             <button id="incidentButton" class="danger-button" type="button">
               <i data-lucide="siren"></i>
-              Emergencia
+              Emergência
             </button>
           </div>
         </header>
@@ -102,7 +102,7 @@
       <form id="freightForm" method="dialog">
         <div class="modal-header">
           <div>
-            <p class="eyebrow">Publicacao operacional</p>
+            <p class="eyebrow">Publicação operacional</p>
             <h2>Nova carga</h2>
           </div>
           <button class="icon-button" type="button" data-close-dialog="freightDialog" aria-label="Fechar">
@@ -144,7 +144,7 @@
             <input name="cargoValue" type="number" required min="1" value="220000" />
           </label>
           <label>
-            Veiculo
+            Veículo
             <select name="requiredVehicle">
               <option value="truck">Truck</option>
               <option value="toco">Toco</option>
@@ -154,18 +154,18 @@
           <label>
             Carroceria
             <select name="requiredBody">
-              <option value="bau">Bau</option>
+              <option value="bau">Baú</option>
               <option value="sider">Sider</option>
               <option value="refrigerado">Refrigerado</option>
               <option value="graneleiro">Graneleiro</option>
             </select>
           </label>
           <label>
-            Distancia km
+            Distância km
             <input name="distanceKm" type="number" min="1" value="580" />
           </label>
           <label>
-            Pedagios
+            Pedágios
             <input name="tolls" type="number" min="0" value="390" />
           </label>
         </div>
@@ -214,11 +214,11 @@
             <input name="vehiclePlate" required value="ABC1D23" />
           </label>
           <label>
-            Distancia ate coleta
+            Distância até coleta
             <input name="distanceToPickupKm" type="number" min="0" value="24" />
           </label>
           <label>
-            Veiculo
+            Veículo
             <select name="vehicleType">
               <option value="truck">Truck</option>
               <option value="toco">Toco</option>
@@ -228,7 +228,7 @@
           <label>
             Carroceria
             <select name="bodyType">
-              <option value="bau">Bau</option>
+              <option value="bau">Baú</option>
               <option value="sider">Sider</option>
               <option value="refrigerado">Refrigerado</option>
               <option value="graneleiro">Graneleiro</option>
@@ -251,7 +251,7 @@
         <div class="modal-header">
           <div>
             <p class="eyebrow">Torre de controle</p>
-            <h2>Registrar emergencia</h2>
+            <h2>Registrar emergência</h2>
           </div>
           <button class="icon-button" type="button" data-close-dialog="incidentDialog" aria-label="Fechar">
             <i data-lucide="x"></i>
@@ -275,7 +275,7 @@
           </label>
           <label class="span-2">
             Mensagem
-            <input name="message" value="Emergencia registrada pela torre de controle" />
+            <input name="message" value="Emergência registrada pela torre de controle" />
           </label>
         </div>
 

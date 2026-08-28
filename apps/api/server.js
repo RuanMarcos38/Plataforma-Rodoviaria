@@ -104,7 +104,7 @@ function readBody(request) {
     request.on("data", (chunk) => {
       body += chunk;
       if (body.length > 1_000_000) {
-        reject(new Error("Corpo da requisicao excede o limite"));
+        reject(new Error("Corpo da requisição excede o limite"));
         request.destroy();
       }
     });
@@ -113,7 +113,7 @@ function readBody(request) {
       try {
         resolve(JSON.parse(body));
       } catch (error) {
-        reject(new Error("JSON invalido"));
+        reject(new Error("JSON inválido"));
       }
     });
     request.on("error", reject);
@@ -160,7 +160,7 @@ function serveStatic(request, response, urlPath) {
 
 function requireTenantEntity(response, tenantId, entity, entityName) {
   if (!entity || entity.tenantId !== tenantId) {
-    sendError(response, 404, `${entityName} nao encontrado para este tenant`);
+    sendError(response, 404, `${entityName} não encontrado para esta empresa`);
     return false;
   }
   return true;
@@ -168,7 +168,7 @@ function requireTenantEntity(response, tenantId, entity, entityName) {
 
 function assertAnyPermission(role, permissions) {
   if (!permissions.some((permission) => hasPermission(role, permission))) {
-    throw new Error(`Perfil ${role || "desconhecido"} sem permissao ${permissions.join(" ou ")}`);
+    throw new Error(`Perfil ${role || "desconhecido"} sem permissão ${permissions.join(" ou ")}`);
   }
 }
 
@@ -253,7 +253,7 @@ function validateFreight(payload) {
   const required = ["shipper", "originCity", "originUf", "destinationCity", "destinationUf", "cargo", "weightKg", "cargoValue"];
   const missing = required.filter((field) => !payload[field]);
   if (missing.length) {
-    throw new Error(`Campos obrigatorios ausentes: ${missing.join(", ")}`);
+    throw new Error(`Campos obrigatórios ausentes: ${missing.join(", ")}`);
   }
 }
 
@@ -297,7 +297,7 @@ function createFreight(tenantId, role, payload) {
     priority: payload.priority || "media",
     returnOpportunity: Boolean(payload.returnOpportunity),
     price: Number(payload.price || estimateFreightCost({ distanceKm, tolls, cargoValue, axles }).suggestedPrice),
-    requirements: payload.requirements || ["RNTRC ativo", "Documentos validos", "Rastreamento"],
+    requirements: payload.requirements || ["RNTRC ativo", "Documentos válidos", "Rastreamento"],
     createdAt: safeNow()
   };
 
@@ -317,7 +317,7 @@ function createDriver(tenantId, role, payload) {
   const required = ["name", "city", "uf", "vehiclePlate"];
   const missing = required.filter((field) => !payload[field]);
   if (missing.length) {
-    throw new Error(`Campos obrigatorios ausentes: ${missing.join(", ")}`);
+    throw new Error(`Campos obrigatórios ausentes: ${missing.join(", ")}`);
   }
 
   const driver = {
@@ -350,10 +350,10 @@ function createOffer(request, tenantId, role, payload) {
   const freight = data.freights.find((item) => item.id === payload.freightId);
   const driver = data.drivers.find((item) => item.id === payload.driverId);
   if (!freight || freight.tenantId !== tenantId) {
-    throw new Error("Frete nao encontrado");
+    throw new Error("Frete não encontrado");
   }
   if (!driver || driver.tenantId !== tenantId) {
-    throw new Error("Motorista nao encontrado");
+    throw new Error("Motorista não encontrado");
   }
 
   return idempotent(request, payload.idempotencyKey, () => {
@@ -401,14 +401,14 @@ function createFiscalDocument(tenantId, tripId, type, status = "pending") {
 function createContract(request, tenantId, role, payload) {
   const offer = data.offers.find((item) => item.id === payload.offerId);
   if (!offer || offer.tenantId !== tenantId) {
-    throw new Error("Proposta nao encontrada");
+    throw new Error("Proposta não encontrada");
   }
 
   return idempotent(request, payload.idempotencyKey, () => {
     const freight = data.freights.find((item) => item.id === offer.freightId);
     const driver = data.drivers.find((item) => item.id === offer.driverId);
     if (!freight || !driver) {
-      throw new Error("Proposta sem frete ou motorista valido");
+      throw new Error("Proposta sem frete ou motorista válido");
     }
 
     freight.status = "ACCEPTED";
@@ -438,10 +438,10 @@ function createContract(request, tenantId, role, payload) {
       contractId: contract.id,
       status: "DOCUMENTATION",
       vehiclePlate: driver.vehiclePlate,
-      route: `${freight.origin.city}/${freight.origin.uf} -> ${freight.destination.city}/${freight.destination.uf}`,
+      route: `${freight.origin.city}/${freight.origin.uf} → ${freight.destination.city}/${freight.destination.uf}`,
       eta: freight.deliveryEta,
       progress: 12,
-      alerts: [{ type: "document", text: "Preparar CIOT, CT-e e MDF-e em homologacao" }],
+      alerts: [{ type: "document", text: "Preparar CIOT, CT-e e MDF-e em homologação" }],
       timeline: [
         { at: displayTime(), status: "ACCEPTED", text: "Proposta aceita" },
         { at: displayTime(), status: "DOCUMENTATION", text: "Fluxo documental iniciado" }
@@ -475,7 +475,7 @@ function createContract(request, tenantId, role, payload) {
 function authorizeFiscalDocument(request, tenantId, role, payload) {
   const document = data.fiscalDocuments.find((item) => item.id === payload.documentId);
   if (!document || document.tenantId !== tenantId) {
-    throw new Error("Documento fiscal nao encontrado");
+    throw new Error("Documento fiscal não encontrado");
   }
 
   return idempotent(request, payload.idempotencyKey, () => {
@@ -490,7 +490,7 @@ function authorizeFiscalDocument(request, tenantId, role, payload) {
 function settlePayment(request, tenantId, role, paymentId, payload) {
   const payment = data.payments.find((item) => item.id === paymentId);
   if (!payment || payment.tenantId !== tenantId) {
-    throw new Error("Pagamento nao encontrado");
+    throw new Error("Pagamento não encontrado");
   }
 
   return idempotent(request, payload.idempotencyKey, () => {
@@ -500,7 +500,7 @@ function settlePayment(request, tenantId, role, paymentId, payload) {
     if (trip && trip.status === "SETTLEMENT_PENDING") {
       trip.status = "CLOSED";
       trip.progress = 100;
-      trip.timeline.push({ at: displayTime(), status: "CLOSED", text: "Pagamento liquidado e operacao encerrada" });
+      trip.timeline.push({ at: displayTime(), status: "CLOSED", text: "Pagamento liquidado e operação encerrada" });
     }
     audit(tenantId, role, "payment:settle", payment.id);
     return payment;
@@ -510,7 +510,7 @@ function settlePayment(request, tenantId, role, paymentId, payload) {
 function registerTrackingPing(tenantId, role, payload) {
   const trip = data.trips.find((item) => item.id === payload.tripId);
   if (!trip || trip.tenantId !== tenantId) {
-    throw new Error("Viagem nao encontrada");
+    throw new Error("Viagem não encontrada");
   }
 
   trip.lastPing = {
@@ -683,9 +683,9 @@ async function handleApi(request, response, url) {
           score: driver.riskScore,
           level: driver.riskScore >= 50 ? "medio" : "baixo",
           findings: [
-            driver.documentsStatus === "valid" ? "Documentos validos" : "Documentos em revisao",
+            driver.documentsStatus === "valid" ? "Documentos válidos" : "Documentos em revisão",
             driver.rntrcStatus === "active" ? "RNTRC ativo" : "RNTRC pendente",
-            driver.available ? "Disponivel" : "Em viagem"
+            driver.available ? "Disponível" : "Em viagem"
           ]
         }));
       return sendJson(response, 200, checks);
@@ -705,7 +705,7 @@ async function handleApi(request, response, url) {
         tripId: payload.tripId,
         type: payload.type || "operacional",
         severity: payload.severity || "alta",
-        message: payload.message || "Ocorrencia registrada pela torre",
+        message: payload.message || "Ocorrência registrada pela torre",
         createdAt: safeNow()
       };
 
@@ -742,9 +742,9 @@ async function handleApi(request, response, url) {
       return sendJson(response, 200, data.auditLog.filter((item) => item.tenantId === tenantId).slice(0, 25));
     }
 
-    return sendError(response, 404, "Rota nao encontrada");
+    return sendError(response, 404, "Rota não encontrada");
   } catch (error) {
-    return sendError(response, error.message.includes("permissao") ? 403 : 400, error.message);
+    return sendError(response, error.message.includes("permissão") ? 403 : 400, error.message);
   }
 }
 
@@ -765,7 +765,7 @@ function startServer(port = PORT, callback) {
   server.listen(port, () => {
     const address = server.address();
     const actualPort = typeof address === "object" && address ? address.port : port;
-    console.log(`Plataforma Rodoviaria rodando em http://localhost:${actualPort}`);
+    console.log(`Plataforma Rodoviária rodando em http://localhost:${actualPort}`);
     if (callback) callback(server);
   });
   return server;

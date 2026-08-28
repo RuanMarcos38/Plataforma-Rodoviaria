@@ -1,6 +1,6 @@
-# Plataforma Rodoviaria
+# Plataforma Rodoviária
 
-MVP local da Plataforma Rodoviaria, um ecossistema nacional para marketplace de fretes, TMS, rastreamento, fiscal, financeiro, frota, motoristas e torre de controle.
+MVP local da Plataforma Rodoviária, um ecossistema nacional para mercado de fretes, TMS, rastreamento, fiscal, financeiro, frota, motoristas e torre de controle.
 
 ## Executar
 
@@ -10,7 +10,7 @@ npm start
 
 Acesse `http://localhost:3000`.
 
-No Windows desta maquina, se `node` nao estiver no PATH:
+No Windows desta máquina, se `node` não estiver no PATH:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/start-local.ps1
@@ -28,30 +28,30 @@ Ou, no Windows com runtime embutido do Codex:
 powershell -ExecutionPolicy Bypass -File scripts/test-local.ps1
 ```
 
-## Modulos entregues no MVP
+## Módulos entregues no MVP
 
-- Torre de controle com indicadores, mapa operacional e fila critica.
-- Marketplace com busca, filtros e publicacao de cargas.
-- Smart Freight Match com ranking de motoristas, envio de proposta e contratacao.
-- Central de viagens com state machine, timeline e ping de rastreamento.
-- Fiscal e regulatorio com estrutura para CT-e, MDF-e, CIOT e autorizacao em homologacao.
-- Financeiro com pagamentos, liquidacao, status e idempotencia.
-- Admin com identidade de marca parametrizavel por tenant.
-- API local com persistencia em arquivo, RBAC, isolamento por tenant e auditoria.
+- Torre de controle com indicadores, mapa operacional e fila crítica.
+- Mercado de fretes com busca, filtros e publicação de cargas.
+- Alocação inteligente com ranking de motoristas, envio de proposta e contratação.
+- Central de viagens com máquina de estados, histórico e ping de rastreamento.
+- Fiscal e regulatório com estrutura para CT-e, MDF-e, CIOT e autorização em homologação.
+- Financeiro com pagamentos, liquidação, status e idempotência.
+- Administração com identidade de marca parametrizável por empresa.
+- API local com persistência em arquivo, RBAC, isolamento por empresa e auditoria.
 
 ## Estrutura
 
 ```text
 apps/api        API HTTP local
 apps/web        Interface web
-packages/domain Regras de negocio compartilhadas
-docs            Documentacao do produto e arquitetura
-assets          Referencias visuais
+packages/domain Regras de negócio compartilhadas
+docs            Documentação do produto e arquitetura
+assets          Referências visuais
 data            Armazenamento local de desenvolvimento, ignorado pelo Git
-scripts         Execucao e testes locais no Windows
+scripts         Execução e testes locais no Windows
 tests           Testes automatizados iniciais
 ```
 
-## Observacao
+## Observação
 
-O prompt em `docs/PROMPT_MESTRE.md` e documento de requisitos e visao de produto. Esta primeira versao roda com dados de desenvolvimento em `data/dev-store.json` e nao deve receber dados reais, certificados, tokens ou chaves de producao.
+O prompt em `docs/PROMPT_MESTRE.md` é documento de requisitos e visão de produto. Esta primeira versão roda com dados de desenvolvimento em `data/dev-store.json` e não deve receber dados reais, certificados, tokens ou chaves de produção.
