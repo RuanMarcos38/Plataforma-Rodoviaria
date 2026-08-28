@@ -1,0 +1,14 @@
+{
+  "name": "plataforma-rodoviaria",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MVP local da Plataforma Rodoviaria para marketplace de fretes, TMS, tracking e operacao fiscal.",
+  "scripts": {
+    "start": "node apps/api/server.js",
+    "dev": "node apps/api/server.js",
+    "test": "node tests/domain.test.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

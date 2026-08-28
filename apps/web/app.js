@@ -1,0 +1,927 @@
+const state = {
+  view: "control",
+  tenantId: localStorage.getItem("r2r.tenantId") || "",
+  role: localStorage.getItem("r2r.role") || "CARRIER_MANAGER",
+  query: "",
+  statusFilter: "all",
+  priorityFilter: "all",
+  selectedFreightId: "",
+  selectedTripId: "",
+  bootstrap: null,
+  dashboard: null,
+  freights: [],
+  drivers: [],
+  trips: [],
+  fiscal: [],
+  finance: [],
+  risk: [],
+  audit: []
+};
+
+const views = {
+  control: "Torre de controle nacional",
+  marketplace: "Marketplace nacional de fretes",
+  matching: "Smart Freight Match",
+  trips: "Central de viagens e tracking",
+  fiscal: "Operacao fiscal e regulatoria",
+  finance: "Financeiro e pagamentos protegidos",
+  admin: "Painel administrador"
+};
+
+const statusLabels = {
+  DRAFT: "Rascunho",
+  PUBLISHED: "Publicado",
+  MATCHING: "Buscando motorista",
+  NEGOTIATING: "Em negociacao",
+  ACCEPTED: "Aceito",
+  DOCUMENTATION: "Documentacao",
+  SCHEDULED_PICKUP: "Coleta agendada",
+  EN_ROUTE_PICKUP: "Indo para coleta",
+  AT_PICKUP: "Na coleta",
+  LOADING: "Carregando",
+  IN_TRANSIT: "Em transito",
+  AT_DESTINATION: "No destino",
+  UNLOADING: "Descarregando",
+  DELIVERED: "Entregue",
+  DOCUMENT_PENDING: "Documento pendente",
+  SETTLEMENT_PENDING: "Pagamento pendente",
+  CLOSED: "Encerrado",
+  CANCELLED: "Cancelado",
+  INCIDENT: "Ocorrencia"
+};
+
+const nextByStatus = {
+  DOCUMENTATION: "SCHEDULED_PICKUP",
+  SCHEDULED_PICKUP: "EN_ROUTE_PICKUP",
+  EN_ROUTE_PICKUP: "AT_PICKUP",
+  AT_PICKUP: "LOADING",
+  LOADING: "IN_TRANSIT",
+  IN_TRANSIT: "AT_DESTINATION",
+  AT_DESTINATION: "UNLOADING",
+  UNLOADING: "DELIVERED",
+  DELIVERED: "SETTLEMENT_PENDING",
+  SETTLEMENT_PENDING: "CLOSED",
+  INCIDENT: "IN_TRANSIT"
+};
+
+const formatter = new Intl.NumberFormat("pt-BR", {
+  style: "currency",
+  currency: "BRL"
+});
+
+const numberFormatter = new Intl.NumberFormat("pt-BR");
+
+const elements = {
+  content: document.querySelector("#content"),
+  messageArea: document.querySelector("#messageArea"),
+  pageTitle: document.querySelector("#pageTitle"),
+  brandName: document.querySelector("#brandName"),
+  tenantSelect: document.querySelector("#tenantSelect"),
+  roleSelect: document.querySelector("#roleSelect"),
+  globalSearch: document.querySelector("#globalSearch"),
+  freightDialog: document.querySelector("#freightDialog"),
+  freightForm: document.querySelector("#freightForm"),
+  incidentDialog: document.querySelector("#incidentDialog"),
+  incidentForm: document.querySelector("#incidentForm"),
+  incidentTripSelect: document.querySelector("#incidentTripSelect"),
+  toast: document.querySelector("#toast")
+};
+
+function money(value) {
+  return formatter.format(Number(value || 0));
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function statusClass(status) {
+  if (["DOCUMENT_PENDING", "INCIDENT", "CANCELLED"].includes(status)) return "danger";
+  if (["NEGOTIATING", "DOCUMENTATION", "SETTLEMENT_PENDING"].includes(status)) return "warning";
+  return "";
+}
+
+function idempotencyKey(prefix) {
+  return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+async function api(path, options = {}) {
+  const response = await fetch(path, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      "x-tenant-id": state.tenantId,
+      "x-role": state.role,
+      ...(options.headers || {})
+    }
+  });
+
+  const payload = await response.json();
+  if (!response.ok) {
+    throw new Error(payload.error || "Falha na API local");
+  }
+  return payload;
+}
+
+async function optionalApi(path, fallback) {
+  try {
+    return await api(path);
+  } catch (error) {
+    return fallback;
+  }
+}
+
+function can(permission) {
+  const permissions = state.bootstrap?.roles?.[state.role]?.permissions || [];
+  return permissions.includes("*") || permissions.includes(permission);
+}
+
+function toast(message) {
+  elements.toast.textContent = message;
+  elements.toast.classList.add("is-visible");
+  window.clearTimeout(toast.timeout);
+  toast.timeout = window.setTimeout(() => elements.toast.classList.remove("is-visible"), 3200);
+}
+
+function showNotice(message) {
+  elements.messageArea.innerHTML = message
+    ? `<div class="notice"><i data-lucide="info"></i>${escapeHtml(message)}</div>`
+    : "";
+  refreshIcons();
+}
+
+function refreshIcons() {
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
+}
+
+function setBrand(brand) {
+  if (!brand) return;
+  document.documentElement.style.setProperty("--primary", brand.primaryColor || "#0f5f63");
+  document.documentElement.style.setProperty("--accent", brand.accentColor || "#f97316");
+  elements.brandName.textContent = brand.appName || "R2R Logistica";
+}
+
+function syncChromePermissions() {
+  document.querySelector("#newFreightButton").hidden = !can("freight:create");
+  document.querySelector("#incidentButton").hidden = !can("incident:create");
+}
+
+function renderSelects() {
+  elements.tenantSelect.innerHTML = state.bootstrap.tenants
+    .map((tenant) => `<option value="${tenant.id}">${escapeHtml(tenant.name)}</option>`)
+    .join("");
+  elements.tenantSelect.value = state.tenantId;
+
+  elements.roleSelect.innerHTML = Object.entries(state.bootstrap.roles)
+    .map(([key, role]) => `<option value="${key}">${escapeHtml(role.label)}</option>`)
+    .join("");
+  elements.roleSelect.value = state.role;
+}
+
+async function loadAll() {
+  const [dashboard, freights, trips, fiscal, finance, risk, audit] = await Promise.all([
+    optionalApi("/api/dashboard", {}),
+    can("freight:read")
+      ? optionalApi(`/api/freights?q=${encodeURIComponent(state.query)}&status=${state.statusFilter}&priority=${state.priorityFilter}`, [])
+      : [],
+    can("trip:read") ? optionalApi("/api/trips", []) : [],
+    can("fiscal:read") ? optionalApi("/api/fiscal", []) : [],
+    can("finance:read") ? optionalApi("/api/finance", []) : [],
+    optionalApi("/api/risk", []),
+    optionalApi("/api/audit", [])
+  ]);
+
+  state.dashboard = dashboard;
+  state.freights = freights;
+  state.trips = trips;
+  state.fiscal = fiscal;
+  state.finance = finance;
+  state.risk = risk;
+  state.audit = audit;
+
+  if (!state.selectedFreightId && freights[0]) state.selectedFreightId = freights[0].id;
+  if (!state.selectedTripId && trips[0]) state.selectedTripId = trips[0].id;
+
+  await loadDrivers();
+}
+
+async function loadDrivers() {
+  if (!can("driver:read")) {
+    state.drivers = [];
+    return;
+  }
+  const query = state.selectedFreightId ? `?freightId=${encodeURIComponent(state.selectedFreightId)}` : "";
+  state.drivers = await api(`/api/drivers${query}`);
+}
+
+function render() {
+  elements.pageTitle.textContent = views[state.view];
+  syncChromePermissions();
+  document.querySelectorAll(".nav-button").forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.view === state.view);
+  });
+
+  const activeTenant = state.bootstrap.tenants.find((tenant) => tenant.id === state.tenantId);
+  setBrand(activeTenant?.brand);
+
+  if (state.view === "control") renderControl();
+  if (state.view === "marketplace") renderMarketplace();
+  if (state.view === "matching") renderMatching();
+  if (state.view === "trips") renderTrips();
+  if (state.view === "fiscal") renderFiscal();
+  if (state.view === "finance") renderFinance();
+  if (state.view === "admin") renderAdmin();
+  refreshIcons();
+}
+
+function kpi(label, value, trend) {
+  return `
+    <article class="kpi-card">
+      <small>${escapeHtml(label)}</small>
+      <strong>${escapeHtml(value)}</strong>
+      <span>${escapeHtml(trend)}</span>
+    </article>
+  `;
+}
+
+function renderKpis() {
+  const d = state.dashboard;
+  return `
+    <section class="kpi-grid">
+      ${kpi("Fretes abertos", d.openFreights, `${d.driversAvailable} motoristas disponiveis`)}
+      ${kpi("Viagens ativas", d.activeTrips, `${d.delayedTrips} com alerta`)}
+      ${kpi("Pendencias fiscais", d.fiscalPending, "CT-e, MDF-e, CIOT")}
+      ${kpi("Receita monitorada", money(d.revenue), `${d.otif}% OTIF`)}
+    </section>
+  `;
+}
+
+function renderControl() {
+  const pins = state.trips.slice(0, 3);
+  elements.content.innerHTML = `
+    ${renderKpis()}
+    <section class="two-column">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Mapa operacional</p>
+            <h2>Cargas, veiculos e alertas em tempo real</h2>
+          </div>
+          <button class="secondary-button" type="button" data-action="refresh">
+            <i data-lucide="refresh-cw"></i>
+            Atualizar
+          </button>
+        </div>
+        <div class="control-map" aria-label="Mapa operacional simulado">
+          <div class="route-line"></div>
+          ${pins
+            .map(
+              (trip, index) => `
+                <div class="map-pin pin-${index + 1}">
+                  <strong>${escapeHtml(trip.vehiclePlate)}</strong>
+                  <small>${escapeHtml(statusLabels[trip.status] || trip.status)}</small>
+                  <small>${escapeHtml(trip.lastPing.city)}/${escapeHtml(trip.lastPing.uf)} ${escapeHtml(trip.lastPing.at)}</small>
+                </div>
+              `
+            )
+            .join("")}
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Fila critica</p>
+            <h2>Operacoes para decidir</h2>
+          </div>
+        </div>
+        <div class="lane-list">
+          ${state.freights.slice(0, 4).map(renderFreightCard).join("") || empty("Nenhum frete encontrado")}
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function renderFreightCard(freight) {
+  return `
+    <article class="record-card">
+      <div class="record-topline">
+        <strong>${escapeHtml(freight.id)}</strong>
+        <span class="status-pill ${statusClass(freight.status)}">${escapeHtml(statusLabels[freight.status] || freight.status)}</span>
+      </div>
+      <div>
+        <h3>${escapeHtml(freight.origin.city)}/${escapeHtml(freight.origin.uf)} -> ${escapeHtml(freight.destination.city)}/${escapeHtml(freight.destination.uf)}</h3>
+        <p class="muted">${escapeHtml(freight.cargo)} · ${numberFormatter.format(freight.weightKg)} kg · ${escapeHtml(freight.requiredBody)}</p>
+      </div>
+      <div class="tag-row">
+        <span class="tag">${money(freight.price)}</span>
+        <span class="tag">${numberFormatter.format(freight.distanceKm)} km</span>
+        <span class="risk-pill ${freight.riskScore >= 50 ? "medio" : "baixo"}">Risco ${freight.riskScore}</span>
+      </div>
+      <div class="record-actions">
+        <button class="secondary-button" type="button" data-select-freight="${freight.id}" data-target-view="matching">
+          <i data-lucide="route"></i>
+          Ver matching
+        </button>
+      </div>
+    </article>
+  `;
+}
+
+function renderMarketplace() {
+  elements.content.innerHTML = `
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">Fretes publicados</p>
+          <h2>Busca e contratacao</h2>
+        </div>
+        <button class="primary-button" type="button" data-action="open-freight">
+          <i data-lucide="plus"></i>
+          Publicar
+        </button>
+      </div>
+      <div class="filters">
+        <select id="statusFilter" class="select">
+          ${filterOption("all", "Todos os status", state.statusFilter)}
+          ${Object.entries(statusLabels).map(([key, label]) => filterOption(key, label, state.statusFilter)).join("")}
+        </select>
+        <select id="priorityFilter" class="select">
+          ${filterOption("all", "Todas as prioridades", state.priorityFilter)}
+          ${filterOption("alta", "Alta", state.priorityFilter)}
+          ${filterOption("media", "Media", state.priorityFilter)}
+          ${filterOption("baixa", "Baixa", state.priorityFilter)}
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Frete</th>
+              <th>Rota</th>
+              <th>Carga</th>
+              <th>Coleta</th>
+              <th>Valor</th>
+              <th>Status</th>
+              <th>Acao</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${state.freights
+              .map(
+                (freight) => `
+                  <tr>
+                    <td><strong>${escapeHtml(freight.id)}</strong><br /><span class="muted">${escapeHtml(freight.shipper)}</span></td>
+                    <td>${escapeHtml(freight.origin.city)}/${escapeHtml(freight.origin.uf)}<br />${escapeHtml(freight.destination.city)}/${escapeHtml(freight.destination.uf)}</td>
+                    <td>${escapeHtml(freight.cargo)}<br /><span class="muted">${numberFormatter.format(freight.weightKg)} kg · ${escapeHtml(freight.requiredVehicle)}</span></td>
+                    <td>${escapeHtml(freight.pickupWindow)}<br /><span class="muted">ETA ${escapeHtml(freight.deliveryEta)}</span></td>
+                    <td><strong>${money(freight.price)}</strong><br /><span class="muted">Custo ${money(freight.estimate.subtotal)}</span></td>
+                    <td><span class="status-pill ${statusClass(freight.status)}">${escapeHtml(statusLabels[freight.status] || freight.status)}</span></td>
+                    <td>
+                      <button class="secondary-button" type="button" data-select-freight="${freight.id}" data-target-view="matching">
+                        <i data-lucide="users"></i>
+                        Motoristas
+                      </button>
+                    </td>
+                  </tr>
+                `
+              )
+              .join("")}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  `;
+
+  document.querySelector("#statusFilter").addEventListener("change", async (event) => {
+    state.statusFilter = event.target.value;
+    await refreshAndRender();
+  });
+  document.querySelector("#priorityFilter").addEventListener("change", async (event) => {
+    state.priorityFilter = event.target.value;
+    await refreshAndRender();
+  });
+}
+
+function filterOption(value, label, activeValue) {
+  return `<option value="${value}" ${activeValue === value ? "selected" : ""}>${escapeHtml(label)}</option>`;
+}
+
+function renderMatching() {
+  const selected = state.freights.find((freight) => freight.id === state.selectedFreightId) || state.freights[0];
+  if (!selected) {
+    elements.content.innerHTML = empty("Cadastre uma carga para iniciar o matching.");
+    return;
+  }
+
+  const driverList = can("driver:read")
+    ? state.drivers.map((driver) => renderDriverCard(driver, selected)).join("") || empty("Nenhum motorista compativel.")
+    : empty("Este perfil pode acompanhar cargas, mas nao acessa o ranking de motoristas.");
+
+  elements.content.innerHTML = `
+    <section class="two-column">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Carga selecionada</p>
+            <h2>${escapeHtml(selected.id)} · ${escapeHtml(selected.origin.city)} para ${escapeHtml(selected.destination.city)}</h2>
+          </div>
+          <select id="freightSelect" class="select">
+            ${state.freights.map((freight) => filterOption(freight.id, `${freight.id} - ${freight.origin.city}/${freight.origin.uf}`, selected.id)).join("")}
+          </select>
+        </div>
+        ${renderFreightCard(selected)}
+        <div class="finance-grid" style="margin-top: 12px;">
+          <div class="finance-card"><small class="muted">Preco sugerido</small><strong>${money(selected.estimate.suggestedPrice)}</strong></div>
+          <div class="finance-card"><small class="muted">Custo por km</small><strong>${money(selected.estimate.costPerKm)}</strong></div>
+          <div class="finance-card"><small class="muted">Pedagios</small><strong>${money(selected.tolls)}</strong></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Ranking</p>
+            <h2>Motoristas recomendados</h2>
+          </div>
+        </div>
+        <div class="driver-list">
+          ${driverList}
+        </div>
+      </div>
+    </section>
+  `;
+
+  document.querySelector("#freightSelect").addEventListener("change", async (event) => {
+    state.selectedFreightId = event.target.value;
+    await loadDrivers();
+    render();
+  });
+}
+
+function renderDriverCard(driver, freight) {
+  const offerAmount = Math.max(freight.price, freight.estimate.suggestedPrice);
+  return `
+    <article class="record-card driver-card">
+      <div class="driver-score" style="--score: ${driver.matchScore || 0};">${driver.matchScore || "--"}%</div>
+      <div>
+        <div class="record-topline">
+          <strong>${escapeHtml(driver.name)}</strong>
+          <span class="risk-pill ${driver.riskScore >= 50 ? "medio" : "baixo"}">Risco ${driver.riskScore}</span>
+        </div>
+        <p class="muted">${escapeHtml(driver.city)}/${escapeHtml(driver.uf)} · ${driver.distanceToPickupKm} km da coleta · ${escapeHtml(driver.vehiclePlate)}</p>
+        <div class="tag-row">
+          <span class="tag">${escapeHtml(driver.documentsStatus === "valid" ? "Docs validos" : "Docs em revisao")}</span>
+          <span class="tag">${escapeHtml(driver.rntrcStatus === "active" ? "RNTRC ativo" : "RNTRC pendente")}</span>
+          <span class="tag">Nota ${driver.rating}</span>
+        </div>
+        <div class="record-actions" style="margin-top: 10px;">
+          <button class="primary-button" type="button" data-offer-driver="${driver.id}" data-offer-amount="${offerAmount}">
+            <i data-lucide="handshake"></i>
+            Enviar proposta
+          </button>
+        </div>
+      </div>
+    </article>
+  `;
+}
+
+function renderTrips() {
+  elements.content.innerHTML = `
+    <section class="trip-grid">
+      ${state.trips.map(renderTripStage).join("") || empty("Nenhuma viagem cadastrada.")}
+    </section>
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">Historico da viagem</p>
+          <h2>${escapeHtml(state.selectedTripId || "Selecione uma viagem")}</h2>
+        </div>
+      </div>
+      ${renderTimeline()}
+    </section>
+  `;
+}
+
+function renderTripStage(trip) {
+  const nextStatus = nextByStatus[trip.status];
+  const hasAlert = trip.alerts.length > 0;
+  return `
+    <article class="tracking-stage">
+      <div class="record-topline">
+        <strong>${escapeHtml(trip.id)}</strong>
+        <span class="status-pill ${hasAlert ? "warning" : statusClass(trip.status)}">${escapeHtml(statusLabels[trip.status] || trip.status)}</span>
+      </div>
+      <p class="muted">${escapeHtml(trip.route)} · ${escapeHtml(trip.vehiclePlate)}</p>
+      <div class="progress-track" aria-label="Progresso da viagem">
+        <span style="width: ${trip.progress}%"></span>
+      </div>
+      <p class="muted" style="margin-top: 10px;">Ultimo ping: ${escapeHtml(trip.lastPing.city)}/${escapeHtml(trip.lastPing.uf)} · ${escapeHtml(trip.lastPing.at)}</p>
+      ${trip.alerts.map((alert) => `<p class="notice">${escapeHtml(alert.text)}</p>`).join("")}
+      <div class="record-actions">
+        <button class="secondary-button" type="button" data-select-trip="${trip.id}">
+          <i data-lucide="list-checks"></i>
+          Timeline
+        </button>
+        ${
+          nextStatus
+            ? `<button class="primary-button" type="button" data-advance-trip="${trip.id}" data-next-status="${nextStatus}">
+                <i data-lucide="arrow-right"></i>
+                ${escapeHtml(statusLabels[nextStatus])}
+              </button>`
+            : ""
+        }
+      </div>
+    </article>
+  `;
+}
+
+function renderTimeline() {
+  const trip = state.trips.find((item) => item.id === state.selectedTripId) || state.trips[0];
+  if (!trip) return empty("Sem historico.");
+
+  return `
+    <div class="timeline">
+      ${trip.timeline
+        .map(
+          (event) => `
+            <div class="timeline-item">
+              <time>${escapeHtml(event.at)}</time>
+              <div>
+                <strong>${escapeHtml(statusLabels[event.status] || event.status)}</strong>
+                <p class="muted">${escapeHtml(event.text)}</p>
+              </div>
+            </div>
+          `
+        )
+        .join("")}
+    </div>
+  `;
+}
+
+function renderFiscal() {
+  elements.content.innerHTML = `
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">Homologacao fiscal</p>
+          <h2>CT-e, MDF-e, CIOT e Vale-Pedagio</h2>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Documento</th>
+              <th>Viagem</th>
+              <th>Chave</th>
+              <th>Ambiente</th>
+              <th>Status</th>
+              <th>Protocolo</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${state.fiscal
+              .map(
+                (doc) => `
+                  <tr>
+                    <td><strong>${escapeHtml(doc.type)}</strong><br /><span class="muted">${escapeHtml(doc.id)}</span></td>
+                    <td>${escapeHtml(doc.tripId)}</td>
+                    <td>${escapeHtml(doc.key)}</td>
+                    <td>${escapeHtml(doc.environment)}</td>
+                    <td><span class="status-pill ${doc.status === "authorized" ? "" : "warning"}">${escapeHtml(doc.status)}</span></td>
+                    <td>${escapeHtml(doc.protocol || "Aguardando")}</td>
+                  </tr>
+                `
+              )
+              .join("")}
+          </tbody>
+        </table>
+      </div>
+    </section>
+    <section class="panel">
+      <p class="eyebrow">Regra de seguranca</p>
+      <h2>Integracoes oficiais ficam desacopladas</h2>
+      <p class="muted">Este MVP registra estados e estrutura de documentos em homologacao. Em producao, certificados digitais, SEFAZ, ANTT, CIOT, RNTRC e provedores de Vale-Pedagio devem usar cofres de segredo, auditoria e idempotencia.</p>
+    </section>
+  `;
+}
+
+function renderFinance() {
+  const total = state.finance.reduce((sum, payment) => sum + payment.amount, 0);
+  const paid = state.finance.filter((payment) => payment.status === "paid").reduce((sum, payment) => sum + payment.amount, 0);
+  const pending = total - paid;
+
+  elements.content.innerHTML = `
+    <section class="finance-grid">
+      <article class="finance-card"><small class="muted">Valor movimentado</small><strong>${money(total)}</strong></article>
+      <article class="finance-card"><small class="muted">Liquidado</small><strong>${money(paid)}</strong></article>
+      <article class="finance-card"><small class="muted">Protegido ou pendente</small><strong>${money(pending)}</strong></article>
+    </section>
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">Pagamentos</p>
+          <h2>Controle com idempotencia</h2>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Viagem</th>
+              <th>Metodo</th>
+              <th>Valor</th>
+              <th>Status</th>
+              <th>Idempotencia</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${state.finance
+              .map(
+                (payment) => `
+                  <tr>
+                    <td><strong>${escapeHtml(payment.id)}</strong></td>
+                    <td>${escapeHtml(payment.tripId)}</td>
+                    <td>${escapeHtml(payment.method)}</td>
+                    <td>${money(payment.amount)}</td>
+                    <td><span class="status-pill ${payment.status === "pending" ? "warning" : ""}">${escapeHtml(payment.status)}</span></td>
+                    <td>${escapeHtml(payment.idempotencyKey)}</td>
+                  </tr>
+                `
+              )
+              .join("")}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  `;
+}
+
+function renderAdmin() {
+  const tenant = state.bootstrap.tenants.find((item) => item.id === state.tenantId);
+  const adminControls = can("brand:update")
+    ? `
+        <form id="brandForm" class="form-grid">
+          <label>
+            Nome da plataforma
+            <input name="appName" value="${escapeHtml(tenant.brand.appName)}" />
+          </label>
+          <label>
+            Cor principal
+            <input name="primaryColor" type="color" value="${escapeHtml(tenant.brand.primaryColor)}" />
+          </label>
+          <label>
+            Cor de acao
+            <input name="accentColor" type="color" value="${escapeHtml(tenant.brand.accentColor)}" />
+          </label>
+          <div class="span-2">
+            <button class="primary-button" type="submit">
+              <i data-lucide="save"></i>
+              Salvar marca
+            </button>
+          </div>
+        </form>
+      `
+    : empty("Este perfil visualiza auditoria, mas nao altera configuracoes do tenant.");
+
+  elements.content.innerHTML = `
+    <section class="admin-grid">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Multi-tenant</p>
+            <h2>Identidade parametrizavel</h2>
+          </div>
+        </div>
+        ${adminControls}
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Auditoria</p>
+            <h2>Eventos recentes</h2>
+          </div>
+        </div>
+        <div class="audit-list">
+          ${state.audit
+            .map(
+              (item) => `
+                <article class="record-card">
+                  <strong>${escapeHtml(item.action)}</strong>
+                  <span class="muted">${escapeHtml(item.entity)} · ${new Date(item.at).toLocaleString("pt-BR")}</span>
+                </article>
+              `
+            )
+            .join("")}
+        </div>
+      </div>
+    </section>
+  `;
+
+  document.querySelector("#brandForm")?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    try {
+      const brand = await api("/api/brand", {
+        method: "POST",
+        body: JSON.stringify(Object.fromEntries(formData.entries()))
+      });
+      const currentTenant = state.bootstrap.tenants.find((item) => item.id === state.tenantId);
+      currentTenant.brand = brand;
+      setBrand(brand);
+      toast("Marca atualizada para este tenant.");
+    } catch (error) {
+      showNotice(error.message);
+    }
+  });
+}
+
+function empty(message) {
+  return `<div class="empty-state">${escapeHtml(message)}</div>`;
+}
+
+async function refreshAndRender() {
+  showNotice("");
+  try {
+    await loadAll();
+    render();
+  } catch (error) {
+    showNotice(error.message);
+  }
+}
+
+function bindEvents() {
+  document.querySelectorAll(".nav-button").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.view = button.dataset.view;
+      render();
+    });
+  });
+
+  elements.tenantSelect.addEventListener("change", async (event) => {
+    state.tenantId = event.target.value;
+    localStorage.setItem("r2r.tenantId", state.tenantId);
+    state.selectedFreightId = "";
+    state.selectedTripId = "";
+    await refreshAndRender();
+  });
+
+  elements.roleSelect.addEventListener("change", async (event) => {
+    state.role = event.target.value;
+    localStorage.setItem("r2r.role", state.role);
+    await refreshAndRender();
+  });
+
+  elements.globalSearch.addEventListener("input", async (event) => {
+    state.query = event.target.value;
+    state.statusFilter = "all";
+    window.clearTimeout(elements.globalSearch.timeout);
+    elements.globalSearch.timeout = window.setTimeout(refreshAndRender, 180);
+  });
+
+  document.querySelector("#newFreightButton").addEventListener("click", () => elements.freightDialog.showModal());
+  document.querySelector("#incidentButton").addEventListener("click", () => {
+    fillIncidentTrips();
+    elements.incidentDialog.showModal();
+  });
+
+  document.querySelectorAll("[data-close-dialog]").forEach((button) => {
+    button.addEventListener("click", () => document.querySelector(`#${button.dataset.closeDialog}`).close());
+  });
+
+  elements.freightForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
+    payload.idempotencyKey = idempotencyKey("freight");
+    try {
+      await api("/api/freights", {
+        method: "POST",
+        headers: { "Idempotency-Key": payload.idempotencyKey },
+        body: JSON.stringify(payload)
+      });
+      elements.freightDialog.close();
+      state.view = "marketplace";
+      toast("Carga publicada e enviada ao marketplace.");
+      await refreshAndRender();
+    } catch (error) {
+      showNotice(error.message);
+    }
+  });
+
+  elements.incidentForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
+    try {
+      await api("/api/incidents", {
+        method: "POST",
+        body: JSON.stringify(payload)
+      });
+      elements.incidentDialog.close();
+      state.view = "trips";
+      toast("Ocorrencia registrada na torre.");
+      await refreshAndRender();
+    } catch (error) {
+      showNotice(error.message);
+    }
+  });
+
+  elements.content.addEventListener("click", async (event) => {
+    try {
+      const freightButton = event.target.closest("[data-select-freight]");
+      if (freightButton) {
+        state.selectedFreightId = freightButton.dataset.selectFreight;
+        state.view = freightButton.dataset.targetView || "matching";
+        await loadDrivers();
+        render();
+        return;
+      }
+
+      const tripButton = event.target.closest("[data-select-trip]");
+      if (tripButton) {
+        state.selectedTripId = tripButton.dataset.selectTrip;
+        render();
+        return;
+      }
+
+      const offerButton = event.target.closest("[data-offer-driver]");
+      if (offerButton) {
+        const selected = state.freights.find((freight) => freight.id === state.selectedFreightId);
+        const offer = await api("/api/offers", {
+          method: "POST",
+          headers: { "Idempotency-Key": idempotencyKey("offer") },
+          body: JSON.stringify({
+            freightId: selected.id,
+            driverId: offerButton.dataset.offerDriver,
+            amount: Number(offerButton.dataset.offerAmount),
+            message: "Proposta enviada com base no Smart Freight Match"
+          })
+        });
+        toast(`Proposta ${offer.id} enviada.`);
+        await refreshAndRender();
+        return;
+      }
+
+      const advanceButton = event.target.closest("[data-advance-trip]");
+      if (advanceButton) {
+        const trip = await api(`/api/trips/${advanceButton.dataset.advanceTrip}/advance`, {
+          method: "POST",
+          headers: { "Idempotency-Key": idempotencyKey("advance") },
+          body: JSON.stringify({
+            targetStatus: advanceButton.dataset.nextStatus,
+            note: statusLabels[advanceButton.dataset.nextStatus]
+          })
+        });
+        state.selectedTripId = trip.id;
+        toast("Status da viagem atualizado.");
+        await refreshAndRender();
+        return;
+      }
+
+      const actionButton = event.target.closest("[data-action]");
+      if (actionButton?.dataset.action === "open-freight") {
+        elements.freightDialog.showModal();
+      }
+      if (actionButton?.dataset.action === "refresh") {
+        await refreshAndRender();
+        toast("Painel atualizado.");
+      }
+    } catch (error) {
+      showNotice(error.message);
+    }
+  });
+}
+
+function fillIncidentTrips() {
+  elements.incidentTripSelect.innerHTML = state.trips
+    .map((trip) => `<option value="${trip.id}">${escapeHtml(trip.id)} - ${escapeHtml(trip.route)}</option>`)
+    .join("");
+}
+
+async function boot() {
+  try {
+    state.bootstrap = await api("/api/bootstrap");
+    if (!state.tenantId) {
+      state.tenantId = state.bootstrap.tenant.id;
+    }
+    renderSelects();
+    bindEvents();
+    await loadAll();
+    render();
+    showNotice("");
+  } catch (error) {
+    elements.content.innerHTML = empty("Inicie a API local com npm start para carregar o sistema.");
+    showNotice(error.message);
+  }
+}
+
+boot();
