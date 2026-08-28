@@ -10,11 +10,16 @@ const ROLES = {
       "freight:create",
       "freight:read",
       "freight:negotiate",
+      "contract:create",
       "trip:read",
       "trip:advance",
+      "tracking:write",
       "driver:read",
+      "driver:create",
       "fiscal:read",
+      "fiscal:write",
       "finance:read",
+      "finance:settle",
       "incident:create",
       "brand:update"
     ]
@@ -26,6 +31,7 @@ const ROLES = {
       "freight:create",
       "freight:read",
       "freight:negotiate",
+      "contract:create",
       "trip:read",
       "fiscal:read",
       "finance:read"
@@ -39,6 +45,7 @@ const ROLES = {
       "offer:create",
       "trip:read",
       "trip:advance",
+      "tracking:write",
       "incident:create"
     ]
   },

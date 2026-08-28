@@ -14,6 +14,9 @@ const state = {
   trips: [],
   fiscal: [],
   finance: [],
+  offers: [],
+  contracts: [],
+  incidents: [],
   risk: [],
   audit: []
 };
@@ -71,6 +74,31 @@ const formatter = new Intl.NumberFormat("pt-BR", {
 
 const numberFormatter = new Intl.NumberFormat("pt-BR");
 
+const fallbackIcons = {
+  "arrow-right": ">",
+  "badge-plus": "+",
+  "badge-check": "v",
+  "file-check-2": "F",
+  handshake: "=",
+  landmark: "$",
+  "list-checks": "#",
+  "map-pinned": "M",
+  "package-search": "[]",
+  plus: "+",
+  radar: "O",
+  "refresh-cw": "@",
+  route: ">",
+  save: "S",
+  search: "?",
+  send: ">",
+  settings: "*",
+  "shield-alert": "!",
+  siren: "!",
+  truck: "T",
+  users: "U",
+  x: "x"
+};
+
 const elements = {
   content: document.querySelector("#content"),
   messageArea: document.querySelector("#messageArea"),
@@ -81,6 +109,8 @@ const elements = {
   globalSearch: document.querySelector("#globalSearch"),
   freightDialog: document.querySelector("#freightDialog"),
   freightForm: document.querySelector("#freightForm"),
+  driverDialog: document.querySelector("#driverDialog"),
+  driverForm: document.querySelector("#driverForm"),
   incidentDialog: document.querySelector("#incidentDialog"),
   incidentForm: document.querySelector("#incidentForm"),
   incidentTripSelect: document.querySelector("#incidentTripSelect"),
@@ -158,7 +188,16 @@ function showNotice(message) {
 function refreshIcons() {
   if (window.lucide) {
     window.lucide.createIcons();
+    return;
   }
+
+  document.querySelectorAll("i[data-lucide]").forEach((icon) => {
+    if (icon.dataset.iconReady === "true") return;
+    icon.classList.add("fallback-icon");
+    icon.setAttribute("aria-hidden", "true");
+    icon.textContent = fallbackIcons[icon.dataset.lucide] || "*";
+    icon.dataset.iconReady = "true";
+  });
 }
 
 function setBrand(brand) {
@@ -170,6 +209,7 @@ function setBrand(brand) {
 
 function syncChromePermissions() {
   document.querySelector("#newFreightButton").hidden = !can("freight:create");
+  document.querySelector("#newDriverButton").hidden = !can("driver:create");
   document.querySelector("#incidentButton").hidden = !can("incident:create");
 }
 
@@ -186,7 +226,7 @@ function renderSelects() {
 }
 
 async function loadAll() {
-  const [dashboard, freights, trips, fiscal, finance, risk, audit] = await Promise.all([
+  const [dashboard, freights, trips, fiscal, finance, offers, contracts, incidents, risk, audit] = await Promise.all([
     optionalApi("/api/dashboard", {}),
     can("freight:read")
       ? optionalApi(`/api/freights?q=${encodeURIComponent(state.query)}&status=${state.statusFilter}&priority=${state.priorityFilter}`, [])
@@ -194,6 +234,9 @@ async function loadAll() {
     can("trip:read") ? optionalApi("/api/trips", []) : [],
     can("fiscal:read") ? optionalApi("/api/fiscal", []) : [],
     can("finance:read") ? optionalApi("/api/finance", []) : [],
+    can("freight:read") ? optionalApi("/api/offers", []) : [],
+    can("trip:read") ? optionalApi("/api/contracts", []) : [],
+    can("trip:read") ? optionalApi("/api/incidents", []) : [],
     optionalApi("/api/risk", []),
     optionalApi("/api/audit", [])
   ]);
@@ -203,11 +246,18 @@ async function loadAll() {
   state.trips = trips;
   state.fiscal = fiscal;
   state.finance = finance;
+  state.offers = offers;
+  state.contracts = contracts;
+  state.incidents = incidents;
   state.risk = risk;
   state.audit = audit;
 
-  if (!state.selectedFreightId && freights[0]) state.selectedFreightId = freights[0].id;
-  if (!state.selectedTripId && trips[0]) state.selectedTripId = trips[0].id;
+  if (!freights.some((freight) => freight.id === state.selectedFreightId)) {
+    state.selectedFreightId = freights[0]?.id || "";
+  }
+  if (!trips.some((trip) => trip.id === state.selectedTripId)) {
+    state.selectedTripId = trips[0]?.id || "";
+  }
 
   await loadDrivers();
 }
@@ -252,7 +302,16 @@ function kpi(label, value, trend) {
 }
 
 function renderKpis() {
-  const d = state.dashboard;
+  const d = {
+    openFreights: 0,
+    driversAvailable: 0,
+    activeTrips: 0,
+    delayedTrips: 0,
+    fiscalPending: 0,
+    revenue: 0,
+    otif: 100,
+    ...state.dashboard
+  };
   return `
     <section class="kpi-grid">
       ${kpi("Fretes abertos", d.openFreights, `${d.driversAvailable} motoristas disponiveis`)}
@@ -311,6 +370,15 @@ function renderControl() {
 }
 
 function renderFreightCard(freight) {
+  const matchingButton = can("driver:read")
+    ? `
+        <button class="secondary-button" type="button" data-select-freight="${freight.id}" data-target-view="matching">
+          <i data-lucide="route"></i>
+          Ver matching
+        </button>
+      `
+    : "";
+
   return `
     <article class="record-card">
       <div class="record-topline">
@@ -327,10 +395,7 @@ function renderFreightCard(freight) {
         <span class="risk-pill ${freight.riskScore >= 50 ? "medio" : "baixo"}">Risco ${freight.riskScore}</span>
       </div>
       <div class="record-actions">
-        <button class="secondary-button" type="button" data-select-freight="${freight.id}" data-target-view="matching">
-          <i data-lucide="route"></i>
-          Ver matching
-        </button>
+        ${matchingButton}
       </div>
     </article>
   `;
@@ -344,10 +409,14 @@ function renderMarketplace() {
           <p class="eyebrow">Fretes publicados</p>
           <h2>Busca e contratacao</h2>
         </div>
-        <button class="primary-button" type="button" data-action="open-freight">
-          <i data-lucide="plus"></i>
-          Publicar
-        </button>
+        ${
+          can("freight:create")
+            ? `<button class="primary-button" type="button" data-action="open-freight">
+                <i data-lucide="plus"></i>
+                Publicar
+              </button>`
+            : ""
+        }
       </div>
       <div class="filters">
         <select id="statusFilter" class="select">
@@ -386,10 +455,14 @@ function renderMarketplace() {
                     <td><strong>${money(freight.price)}</strong><br /><span class="muted">Custo ${money(freight.estimate.subtotal)}</span></td>
                     <td><span class="status-pill ${statusClass(freight.status)}">${escapeHtml(statusLabels[freight.status] || freight.status)}</span></td>
                     <td>
-                      <button class="secondary-button" type="button" data-select-freight="${freight.id}" data-target-view="matching">
-                        <i data-lucide="users"></i>
-                        Motoristas
-                      </button>
+                      ${
+                        can("driver:read")
+                          ? `<button class="secondary-button" type="button" data-select-freight="${freight.id}" data-target-view="matching">
+                              <i data-lucide="users"></i>
+                              Motoristas
+                            </button>`
+                          : `<span class="muted">Somente leitura</span>`
+                      }
                     </td>
                   </tr>
                 `
@@ -425,6 +498,7 @@ function renderMatching() {
   const driverList = can("driver:read")
     ? state.drivers.map((driver) => renderDriverCard(driver, selected)).join("") || empty("Nenhum motorista compativel.")
     : empty("Este perfil pode acompanhar cargas, mas nao acessa o ranking de motoristas.");
+  const offers = state.offers.filter((offer) => offer.freightId === selected.id);
 
   elements.content.innerHTML = `
     <section class="two-column">
@@ -458,6 +532,35 @@ function renderMatching() {
         </div>
       </div>
     </section>
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">Negociacao</p>
+          <h2>Propostas e contratacao</h2>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Proposta</th>
+              <th>Motorista</th>
+              <th>Valor</th>
+              <th>Status</th>
+              <th>Mensagem</th>
+              <th>Acao</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${
+              offers.length
+                ? offers.map(renderOfferRow).join("")
+                : `<tr><td colspan="6">${empty("Nenhuma proposta enviada para esta carga.")}</td></tr>`
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
   `;
 
   document.querySelector("#freightSelect").addEventListener("change", async (event) => {
@@ -467,8 +570,31 @@ function renderMatching() {
   });
 }
 
+function renderOfferRow(offer) {
+  return `
+    <tr>
+      <td><strong>${escapeHtml(offer.id)}</strong></td>
+      <td>${escapeHtml(offer.driverName)}</td>
+      <td>${money(offer.amount)}</td>
+      <td><span class="status-pill ${offer.status === "sent" ? "warning" : ""}">${escapeHtml(offer.status)}</span></td>
+      <td>${escapeHtml(offer.message)}</td>
+      <td>
+        ${
+          offer.status === "sent" && can("contract:create")
+            ? `<button class="primary-button" type="button" data-contract-offer="${offer.id}">
+                <i data-lucide="badge-check"></i>
+                Contratar
+              </button>`
+            : `<span class="muted">Registrada</span>`
+        }
+      </td>
+    </tr>
+  `;
+}
+
 function renderDriverCard(driver, freight) {
   const offerAmount = Math.max(freight.price, freight.estimate.suggestedPrice);
+  const canSendOffer = can("freight:negotiate") || can("offer:create");
   return `
     <article class="record-card driver-card">
       <div class="driver-score" style="--score: ${driver.matchScore || 0};">${driver.matchScore || "--"}%</div>
@@ -484,10 +610,14 @@ function renderDriverCard(driver, freight) {
           <span class="tag">Nota ${driver.rating}</span>
         </div>
         <div class="record-actions" style="margin-top: 10px;">
-          <button class="primary-button" type="button" data-offer-driver="${driver.id}" data-offer-amount="${offerAmount}">
-            <i data-lucide="handshake"></i>
-            Enviar proposta
-          </button>
+          ${
+            canSendOffer
+              ? `<button class="primary-button" type="button" data-offer-driver="${driver.id}" data-offer-amount="${offerAmount}">
+                  <i data-lucide="handshake"></i>
+                  Enviar proposta
+                </button>`
+              : `<span class="muted">Sem permissao para proposta</span>`
+          }
         </div>
       </div>
     </article>
@@ -539,6 +669,14 @@ function renderTripStage(trip) {
               </button>`
             : ""
         }
+        ${
+          can("tracking:write")
+            ? `<button class="secondary-button" type="button" data-ping-trip="${trip.id}">
+                <i data-lucide="map-pinned"></i>
+                Ping
+              </button>`
+            : ""
+        }
       </div>
     </article>
   `;
@@ -586,6 +724,7 @@ function renderFiscal() {
               <th>Ambiente</th>
               <th>Status</th>
               <th>Protocolo</th>
+              <th>Acao</th>
             </tr>
           </thead>
           <tbody>
@@ -599,6 +738,16 @@ function renderFiscal() {
                     <td>${escapeHtml(doc.environment)}</td>
                     <td><span class="status-pill ${doc.status === "authorized" ? "" : "warning"}">${escapeHtml(doc.status)}</span></td>
                     <td>${escapeHtml(doc.protocol || "Aguardando")}</td>
+                    <td>
+                      ${
+                        doc.status !== "authorized" && can("fiscal:write")
+                          ? `<button class="primary-button" type="button" data-authorize-doc="${doc.id}">
+                              <i data-lucide="file-check-2"></i>
+                              Autorizar
+                            </button>`
+                          : `<span class="muted">Sem acao</span>`
+                      }
+                    </td>
                   </tr>
                 `
               )
@@ -643,6 +792,7 @@ function renderFinance() {
               <th>Valor</th>
               <th>Status</th>
               <th>Idempotencia</th>
+              <th>Acao</th>
             </tr>
           </thead>
           <tbody>
@@ -656,6 +806,16 @@ function renderFinance() {
                     <td>${money(payment.amount)}</td>
                     <td><span class="status-pill ${payment.status === "pending" ? "warning" : ""}">${escapeHtml(payment.status)}</span></td>
                     <td>${escapeHtml(payment.idempotencyKey)}</td>
+                    <td>
+                      ${
+                        payment.status !== "paid" && can("finance:settle")
+                          ? `<button class="primary-button" type="button" data-settle-payment="${payment.id}">
+                              <i data-lucide="landmark"></i>
+                              Liquidar
+                            </button>`
+                          : `<span class="muted">Liquidado</span>`
+                      }
+                    </td>
                   </tr>
                 `
               )
@@ -790,6 +950,7 @@ function bindEvents() {
   });
 
   document.querySelector("#newFreightButton").addEventListener("click", () => elements.freightDialog.showModal());
+  document.querySelector("#newDriverButton").addEventListener("click", () => elements.driverDialog.showModal());
   document.querySelector("#incidentButton").addEventListener("click", () => {
     fillIncidentTrips();
     elements.incidentDialog.showModal();
@@ -812,6 +973,31 @@ function bindEvents() {
       elements.freightDialog.close();
       state.view = "marketplace";
       toast("Carga publicada e enviada ao marketplace.");
+      await refreshAndRender();
+    } catch (error) {
+      showNotice(error.message);
+    }
+  });
+
+  elements.driverForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const formEntries = Object.fromEntries(new FormData(event.currentTarget).entries());
+    const payload = {
+      ...formEntries,
+      vehicleTypes: [formEntries.vehicleType],
+      bodyTypes: [formEntries.bodyType],
+      previousRoutes: [formEntries.uf, "SP", "MG"],
+      idempotencyKey: idempotencyKey("driver")
+    };
+    try {
+      await api("/api/drivers", {
+        method: "POST",
+        headers: { "Idempotency-Key": payload.idempotencyKey },
+        body: JSON.stringify(payload)
+      });
+      elements.driverDialog.close();
+      state.view = "matching";
+      toast("Motorista cadastrado e disponivel para matching.");
       await refreshAndRender();
     } catch (error) {
       showNotice(error.message);
@@ -871,6 +1057,22 @@ function bindEvents() {
         return;
       }
 
+      const contractButton = event.target.closest("[data-contract-offer]");
+      if (contractButton) {
+        const result = await api("/api/contracts", {
+          method: "POST",
+          headers: { "Idempotency-Key": idempotencyKey("contract") },
+          body: JSON.stringify({
+            offerId: contractButton.dataset.contractOffer
+          })
+        });
+        state.selectedTripId = result.trip.id;
+        state.view = "trips";
+        toast(`Contrato ${result.contract.id} criado e viagem aberta.`);
+        await refreshAndRender();
+        return;
+      }
+
       const advanceButton = event.target.closest("[data-advance-trip]");
       if (advanceButton) {
         const trip = await api(`/api/trips/${advanceButton.dataset.advanceTrip}/advance`, {
@@ -883,6 +1085,51 @@ function bindEvents() {
         });
         state.selectedTripId = trip.id;
         toast("Status da viagem atualizado.");
+        await refreshAndRender();
+        return;
+      }
+
+      const pingButton = event.target.closest("[data-ping-trip]");
+      if (pingButton) {
+        const trip = state.trips.find((item) => item.id === pingButton.dataset.pingTrip);
+        const updated = await api("/api/tracking/ping", {
+          method: "POST",
+          body: JSON.stringify({
+            tripId: trip.id,
+            city: trip.lastPing.city,
+            uf: trip.lastPing.uf,
+            speed: Math.max(48, trip.lastPing.speed || 64),
+            progress: Math.min(100, trip.progress + 8)
+          })
+        });
+        state.selectedTripId = updated.id;
+        toast("Ping de rastreamento registrado.");
+        await refreshAndRender();
+        return;
+      }
+
+      const authorizeButton = event.target.closest("[data-authorize-doc]");
+      if (authorizeButton) {
+        await api("/api/fiscal/authorize", {
+          method: "POST",
+          headers: { "Idempotency-Key": idempotencyKey("fiscal") },
+          body: JSON.stringify({
+            documentId: authorizeButton.dataset.authorizeDoc
+          })
+        });
+        toast("Documento autorizado em homologacao.");
+        await refreshAndRender();
+        return;
+      }
+
+      const settleButton = event.target.closest("[data-settle-payment]");
+      if (settleButton) {
+        await api(`/api/payments/${settleButton.dataset.settlePayment}/settle`, {
+          method: "POST",
+          headers: { "Idempotency-Key": idempotencyKey("payment") },
+          body: JSON.stringify({})
+        });
+        toast("Pagamento liquidado.");
         await refreshAndRender();
         return;
       }

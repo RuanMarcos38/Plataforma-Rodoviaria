@@ -12,6 +12,7 @@ Copie `.env.example` para `.env` quando precisar customizar porta ou provedores.
 | `APP_ENV` | Ambiente atual |
 | `DEFAULT_TENANT_ID` | Tenant carregado por padrao |
 | `PUBLIC_APP_NAME` | Nome exibido inicialmente |
+| `DATA_FILE` | Arquivo JSON usado pela persistencia local |
 | `MAP_PROVIDER` | Provedor de mapas |
 | `FISCAL_PROVIDER` | Provedor fiscal |
 | `PAYMENT_PROVIDER` | Provedor financeiro |

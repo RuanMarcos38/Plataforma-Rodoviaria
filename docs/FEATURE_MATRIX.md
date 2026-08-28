@@ -6,11 +6,12 @@
 | RBAC | Perfis e permissoes em dominio | Autenticacao e sessoes reais |
 | Marketplace | Lista, filtro e publicacao de fretes | Cotacoes, anexos e SLA |
 | Matching | Ranking de motoristas por carga | IA, historico real e geolocalizacao |
-| Propostas | Envio de proposta idempotente | Contraproposta e chat |
-| Viagens | State machine e timeline | Tracking real, geofence e ETA |
-| Fiscal | Estrutura CT-e, MDF-e e CIOT | Integracoes oficiais homologadas |
+| Propostas | Envio, listagem e contratacao idempotente | Contraproposta e chat |
+| Viagens | State machine, timeline e ping de tracking | Tracking real, geofence e ETA |
+| Fiscal | Estrutura CT-e, MDF-e, CIOT e autorizacao em homologacao | Integracoes oficiais homologadas |
 | Regulatório | Campos para RNTRC, CIOT e pedagio | Consultas oficiais e versionamento |
-| Financeiro | Pagamentos e status | Provider real, split, escrow e conciliação |
+| Financeiro | Pagamentos, liquidacao e status | Provider real, split, escrow e conciliação |
 | Risco | Score e findings | OCR, biometria, device check e seguradora |
 | Admin | Marca por tenant e auditoria | Planos, usuarios, billing e suporte |
-| Testes | Teste de dominio inicial | Unit, integracao e E2E |
+| Persistencia | Arquivo JSON local ignorado pelo Git | PostgreSQL + PostGIS isolado |
+| Testes | Testes de dominio e HTTP end-to-end | E2E em navegador e carga |

@@ -20,6 +20,7 @@ O MVP ainda nao conecta um banco real. A modelagem abaixo define o alvo PostgreS
 - `freight_requirements`
 - `freight_offers`
 - `freight_contracts`
+- `contracts`
 - `trips`
 - `trip_events`
 - `routes`

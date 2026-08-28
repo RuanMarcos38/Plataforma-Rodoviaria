@@ -82,6 +82,10 @@
               <i data-lucide="plus"></i>
               Nova carga
             </button>
+            <button id="newDriverButton" class="secondary-button" type="button">
+              <i data-lucide="badge-plus"></i>
+              Motorista
+            </button>
             <button id="incidentButton" class="danger-button" type="button">
               <i data-lucide="siren"></i>
               Emergencia
@@ -176,6 +180,72 @@
       </form>
     </dialog>
 
+    <dialog id="driverDialog" class="modal">
+      <form id="driverForm" method="dialog">
+        <div class="modal-header">
+          <div>
+            <p class="eyebrow">Cadastro operacional</p>
+            <h2>Novo motorista</h2>
+          </div>
+          <button class="icon-button" type="button" data-close-dialog="driverDialog" aria-label="Fechar">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+
+        <div class="form-grid">
+          <label>
+            Nome
+            <input name="name" required value="Motorista parceiro" />
+          </label>
+          <label>
+            Telefone
+            <input name="phone" value="+55 11 90000-0000" />
+          </label>
+          <label>
+            Cidade
+            <input name="city" required value="Campinas" />
+          </label>
+          <label>
+            UF
+            <input name="uf" required maxlength="2" value="SP" />
+          </label>
+          <label>
+            Placa
+            <input name="vehiclePlate" required value="ABC1D23" />
+          </label>
+          <label>
+            Distancia ate coleta
+            <input name="distanceToPickupKm" type="number" min="0" value="24" />
+          </label>
+          <label>
+            Veiculo
+            <select name="vehicleType">
+              <option value="truck">Truck</option>
+              <option value="toco">Toco</option>
+              <option value="carreta">Carreta</option>
+            </select>
+          </label>
+          <label>
+            Carroceria
+            <select name="bodyType">
+              <option value="bau">Bau</option>
+              <option value="sider">Sider</option>
+              <option value="refrigerado">Refrigerado</option>
+              <option value="graneleiro">Graneleiro</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="modal-actions">
+          <button class="secondary-button" type="button" data-close-dialog="driverDialog">Cancelar</button>
+          <button class="primary-button" type="submit">
+            <i data-lucide="save"></i>
+            Cadastrar
+          </button>
+        </div>
+      </form>
+    </dialog>
+
     <dialog id="incidentDialog" class="modal">
       <form id="incidentForm" method="dialog">
         <div class="modal-header">
@@ -221,7 +291,6 @@
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-    <script src="https://unpkg.com/lucide@latest"></script>
     <script src="app.js"></script>
   </body>
 </html>

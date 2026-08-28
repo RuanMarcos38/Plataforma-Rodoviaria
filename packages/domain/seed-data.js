@@ -333,6 +333,7 @@ function createSeedData() {
   ];
 
   const offers = [];
+  const contracts = [];
   const incidents = [];
   const auditLog = [
     {
@@ -362,9 +363,10 @@ function createSeedData() {
     fiscalDocuments,
     payments,
     offers,
+    contracts,
     incidents,
     auditLog,
-    idempotency: new Map()
+    idempotency: {}
   };
 }
 

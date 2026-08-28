@@ -1,6 +1,6 @@
 # Arquitetura
 
-Este repositorio inicia a Plataforma Rodoviaria como um monorepo isolado. A primeira entrega e um MVP local com API Node.js sem dependencias externas, frontend web estatico e regras de dominio compartilhadas.
+Este repositorio inicia a Plataforma Rodoviaria como um monorepo isolado. A primeira entrega e um MVP local com API Node.js sem dependencias externas, frontend web estatico, persistencia local em arquivo e regras de dominio compartilhadas.
 
 ## Estrutura
 
@@ -13,6 +13,7 @@ packages/
 docs/           Documentacao tecnica e requisitos
 assets/         Referencias visuais do projeto
 tests/          Testes automatizados iniciais
+scripts/        Scripts locais de execucao e teste
 ```
 
 ## Decisoes iniciais
@@ -20,7 +21,8 @@ tests/          Testes automatizados iniciais
 - Multi-tenant por `tenantId` em todas as entidades operacionais.
 - RBAC centralizado em `packages/domain/rbac.js`.
 - State machine centralizada em `packages/domain/status-machine.js`.
-- API stateless no desenho, com armazenamento em memoria apenas para o MVP local.
+- API sem dependencias externas, com armazenamento local em `data/dev-store.json` para desenvolvimento.
+- O arquivo local de dados e ignorado pelo Git.
 - Integracoes fiscais, reguladoras, financeiras e de mapas desacopladas por modulo.
 - Nenhuma credencial real deve ser versionada.
 
@@ -34,6 +36,7 @@ tests/          Testes automatizados iniciais
 - Financeiro e pagamentos protegidos
 - Administracao de tenant e marca
 - Auditoria operacional
+- Persistencia local de desenvolvimento
 
 ## Proxima arquitetura alvo
 

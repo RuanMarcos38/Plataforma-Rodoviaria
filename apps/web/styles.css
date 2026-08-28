@@ -157,10 +157,21 @@ select {
 .secondary-button svg,
 .danger-button svg,
 .icon-button svg,
-.search-box svg {
+.search-box svg,
+.fallback-icon {
   width: 18px;
   height: 18px;
   flex: none;
+}
+
+.fallback-icon {
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  font-size: 11px;
+  font-style: normal;
+  line-height: 1;
 }
 
 .sidebar-footer {

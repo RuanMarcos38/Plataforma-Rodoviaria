@@ -6,7 +6,11 @@
   "scripts": {
     "start": "node apps/api/server.js",
     "dev": "node apps/api/server.js",
-    "test": "node tests/domain.test.js"
+    "start:windows": "powershell -ExecutionPolicy Bypass -File scripts/start-local.ps1",
+    "test": "node tests/run-all.js",
+    "test:domain": "node tests/domain.test.js",
+    "test:http": "node tests/http.test.js",
+    "test:windows": "powershell -ExecutionPolicy Bypass -File scripts/test-local.ps1"
   },
   "engines": {
     "node": ">=20"
