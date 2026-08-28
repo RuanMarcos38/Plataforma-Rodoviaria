@@ -8,7 +8,14 @@
       name="description"
       content="MVP local da Plataforma Rodoviária para mercado de fretes, TMS, rastreamento e operação fiscal."
     />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="premium-overrides.css" />
   </head>
   <body>
     <div class="app-shell">
@@ -76,7 +83,12 @@
           <div class="topbar-actions">
             <label class="search-box" for="globalSearch">
               <i data-lucide="search"></i>
-              <input id="globalSearch" type="search" placeholder="Buscar frete, rota, motorista..." />
+              <input
+                id="globalSearch"
+                type="search"
+                aria-label="Buscar frete, rota ou motorista"
+                placeholder="Buscar frete, rota, motorista..."
+              />
             </label>
             <button id="newFreightButton" class="primary-button" type="button">
               <i data-lucide="plus"></i>
