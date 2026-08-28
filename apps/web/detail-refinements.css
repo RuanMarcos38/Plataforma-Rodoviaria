@@ -1,0 +1,264 @@
+/*
+ * Plataforma Rodoviária — refinamento de acabamento
+ * Ajustes somente visuais: densidade, tipografia, espaçamento e alinhamento.
+ */
+
+body {
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.app-shell {
+  grid-template-columns: 248px minmax(0, 1fr);
+}
+
+.sidebar {
+  gap: 12px;
+  padding: 18px 14px;
+}
+
+.brand-lockup {
+  min-height: 46px;
+  gap: 10px;
+  margin: 0;
+  padding: 0 4px 12px;
+}
+
+.brand-lockup small {
+  line-height: 1.35;
+}
+
+.field-label {
+  margin: 2px 4px -6px;
+}
+
+.sidebar .select {
+  min-height: 37px;
+  font-size: 13px;
+}
+
+.side-nav {
+  gap: 3px;
+  margin-top: 2px;
+}
+
+.nav-button {
+  min-height: 38px;
+  padding: 0 10px;
+  font-size: 13.5px;
+}
+
+.nav-button i {
+  width: 16px;
+  height: 16px;
+}
+
+.workspace {
+  padding: 20px 26px 32px;
+}
+
+.topbar {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) auto;
+  gap: 24px;
+  align-items: start;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+}
+
+.topbar > div:first-child {
+  min-width: 0;
+  padding-top: 1px;
+}
+
+.eyebrow {
+  margin-bottom: 4px;
+}
+
+h1 {
+  font-size: clamp(24px, 1.85vw, 28px);
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+}
+
+h2 {
+  font-size: 19px;
+  line-height: 1.25;
+}
+
+h3 {
+  font-size: 15.5px;
+  line-height: 1.35;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+  flex-wrap: nowrap;
+}
+
+.search-box {
+  width: clamp(230px, 24vw, 300px);
+  min-height: 38px;
+}
+
+.primary-button,
+.secondary-button,
+.danger-button,
+.icon-button {
+  min-height: 38px;
+  padding-left: 12px;
+  padding-right: 12px;
+  font-size: 13.5px;
+}
+
+.muted,
+.panel-header p,
+.empty-state p {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.message-area:empty {
+  display: none;
+}
+
+.content-area {
+  gap: 14px;
+}
+
+.kpi-grid {
+  gap: 10px;
+}
+
+.kpi-card {
+  min-height: 94px;
+  padding: 14px 15px;
+}
+
+.kpi-card strong {
+  font-size: 23px;
+}
+
+.two-column,
+.finance-grid,
+.trip-grid,
+.admin-grid {
+  gap: 12px;
+}
+
+.panel {
+  padding: 16px;
+}
+
+.panel-header {
+  margin-bottom: 12px;
+}
+
+.record-card {
+  gap: 8px;
+  padding: 13px;
+}
+
+.control-map {
+  gap: 8px;
+  padding: 10px;
+}
+
+.map-pin,
+.pin-1,
+.pin-2,
+.pin-3 {
+  padding: 12px;
+}
+
+.filters {
+  margin-bottom: 10px;
+}
+
+thead th {
+  padding: 10px 11px;
+}
+
+tbody td {
+  padding: 11px;
+}
+
+.finance-card {
+  padding: 14px;
+}
+
+.form-grid {
+  gap: 12px;
+}
+
+.modal-header {
+  margin-bottom: 16px;
+}
+
+.modal-actions {
+  margin-top: 16px;
+}
+
+@media (max-width: 1280px) {
+  .topbar {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .topbar-actions {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .search-box {
+    width: min(100%, 420px);
+  }
+}
+
+@media (max-width: 1120px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    padding: 12px 16px;
+  }
+
+  .workspace {
+    padding: 18px 20px 30px;
+  }
+}
+
+@media (max-width: 760px) {
+  .workspace {
+    padding: 16px 14px 26px;
+  }
+
+  .topbar {
+    gap: 12px;
+    margin-bottom: 14px;
+    padding-bottom: 14px;
+  }
+
+  .topbar-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+  }
+
+  .search-box {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .danger-button {
+    grid-column: 1 / -1;
+  }
+
+  .panel {
+    padding: 14px;
+  }
+}

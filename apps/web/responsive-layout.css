@@ -1,0 +1,675 @@
+/* Plataforma Rodoviária — responsividade dedicada por dispositivo.
+   Somente apresentação: não altera IDs, eventos, rotas, APIs ou regras de negócio. */
+
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.app-shell,
+.workspace,
+.content-area,
+.panel,
+.table-wrap {
+  min-width: 0;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+}
+
+.table-wrap {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-inline: contain;
+}
+
+.modal,
+dialog {
+  max-width: min(760px, calc(100vw - 32px));
+  max-height: min(90vh, 860px);
+  max-height: min(90dvh, 860px);
+  overflow: auto;
+}
+
+/* DESKTOP GRANDE — 1600px+ */
+@media (min-width: 1600px) {
+  .app-shell {
+    grid-template-columns: 248px minmax(0, 1fr) !important;
+  }
+
+  .workspace {
+    padding-inline: 38px !important;
+    padding-bottom: 48px !important;
+  }
+
+  .topbar {
+    margin-inline: -38px !important;
+    padding-inline: 38px !important;
+  }
+
+  .content-area {
+    width: min(100%, 1580px) !important;
+    gap: 26px !important;
+  }
+
+  .kpi-grid {
+    gap: 20px !important;
+  }
+
+  .two-column {
+    grid-template-columns: minmax(0, 1.78fr) minmax(340px, .72fr) !important;
+    gap: 24px !important;
+  }
+
+  .panel {
+    padding: 24px !important;
+  }
+
+  .control-map {
+    min-height: 400px !important;
+  }
+}
+
+/* DESKTOP / NOTEBOOK — 1280px a 1599px */
+@media (min-width: 1280px) and (max-width: 1599px) {
+  .app-shell {
+    grid-template-columns: 228px minmax(0, 1fr) !important;
+  }
+
+  .workspace {
+    padding-inline: 28px !important;
+  }
+
+  .topbar {
+    margin-inline: -28px !important;
+    padding-inline: 28px !important;
+  }
+
+  .content-area {
+    width: min(100%, 1460px) !important;
+  }
+
+  .topbar-actions {
+    min-width: 0;
+  }
+
+  .search-box {
+    width: clamp(230px, 23vw, 340px) !important;
+  }
+
+  .two-column {
+    grid-template-columns: minmax(0, 1.6fr) minmax(300px, .78fr) !important;
+  }
+}
+
+/* TABLET / NOTEBOOK COMPACTO — 768px a 1279px */
+@media (min-width: 768px) and (max-width: 1279px) {
+  .app-shell {
+    display: block !important;
+  }
+
+  .sidebar {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 30 !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 10px 18px !important;
+    border-right: 0 !important;
+    border-bottom: 1px solid var(--ref-line) !important;
+    background: rgba(255, 255, 255, .98) !important;
+  }
+
+  .brand-lockup {
+    min-height: 44px !important;
+    margin-bottom: 8px !important;
+    padding: 0 2px 8px !important;
+  }
+
+  .brand-mark {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .field-label,
+  .sidebar > .select,
+  .sidebar-footer {
+    display: none !important;
+  }
+
+  .side-nav {
+    display: flex !important;
+    gap: 6px !important;
+    width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    padding: 0 0 3px !important;
+    scrollbar-width: thin;
+  }
+
+  .nav-button {
+    flex: 0 0 auto !important;
+    min-height: 36px !important;
+    padding-inline: 12px !important;
+    white-space: nowrap;
+  }
+
+  .workspace {
+    width: 100% !important;
+    padding: 0 22px 34px !important;
+  }
+
+  .topbar {
+    position: relative !important;
+    top: auto !important;
+    grid-template-columns: 1fr !important;
+    gap: 13px !important;
+    min-height: 0 !important;
+    margin: 0 -22px 22px !important;
+    padding: 16px 22px !important;
+  }
+
+  .topbar-actions {
+    display: grid !important;
+    grid-template-columns: minmax(260px, 1fr) auto auto auto !important;
+    align-items: center !important;
+    justify-content: stretch !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .search-box {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .content-area {
+    width: 100% !important;
+    gap: 20px !important;
+  }
+
+  .kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+  }
+
+  .kpi-card {
+    min-height: 108px !important;
+  }
+
+  .two-column {
+    grid-template-columns: 1fr !important;
+    gap: 18px !important;
+  }
+
+  .panel {
+    padding: 20px !important;
+  }
+
+  .control-map {
+    min-height: 320px !important;
+  }
+
+  .trip-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+  }
+
+  .finance-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  .form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .table-wrap table {
+    min-width: 820px;
+  }
+}
+
+/* TABLET RETRATO / MOBILE GRANDE — 600px a 767px */
+@media (min-width: 600px) and (max-width: 767px) {
+  .app-shell {
+    display: block !important;
+  }
+
+  .sidebar {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 30 !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 9px 14px !important;
+    border-right: 0 !important;
+    border-bottom: 1px solid var(--ref-line) !important;
+  }
+
+  .brand-lockup {
+    min-height: 40px !important;
+    margin-bottom: 7px !important;
+    padding: 0 0 7px !important;
+  }
+
+  .field-label,
+  .sidebar > .select,
+  .sidebar-footer {
+    display: none !important;
+  }
+
+  .side-nav {
+    display: flex !important;
+    gap: 5px !important;
+    overflow-x: auto !important;
+    padding-bottom: 2px !important;
+  }
+
+  .nav-button {
+    flex: 0 0 auto !important;
+    min-height: 35px !important;
+    white-space: nowrap;
+  }
+
+  .workspace {
+    padding: 0 18px 30px !important;
+  }
+
+  .topbar {
+    position: relative !important;
+    top: auto !important;
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    margin: 0 -18px 20px !important;
+    padding: 15px 18px !important;
+  }
+
+  .topbar-actions {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr 1fr !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .search-box {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+  }
+
+  .content-area {
+    gap: 18px !important;
+  }
+
+  .kpi-grid,
+  .trip-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  .finance-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .two-column {
+    grid-template-columns: 1fr !important;
+  }
+
+  .panel {
+    padding: 18px !important;
+  }
+
+  .panel-header {
+    gap: 12px !important;
+  }
+
+  .control-map {
+    min-height: 285px !important;
+  }
+
+  .table-wrap table {
+    min-width: 760px;
+  }
+
+  .form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+/* MOBILE — até 599px */
+@media (max-width: 599px) {
+  body {
+    font-size: 14px;
+  }
+
+  .app-shell {
+    display: block !important;
+  }
+
+  .sidebar {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 30 !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 8px 12px !important;
+    border-right: 0 !important;
+    border-bottom: 1px solid var(--ref-line) !important;
+  }
+
+  .brand-lockup {
+    min-height: 38px !important;
+    margin: 0 0 6px !important;
+    padding: 0 0 6px !important;
+  }
+
+  .brand-mark {
+    width: 30px !important;
+    height: 30px !important;
+  }
+
+  .brand-lockup strong {
+    font-size: 13.5px !important;
+  }
+
+  .brand-lockup small {
+    display: none !important;
+  }
+
+  .field-label,
+  .sidebar > .select,
+  .sidebar-footer {
+    display: none !important;
+  }
+
+  .side-nav {
+    display: flex !important;
+    gap: 4px !important;
+    width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    padding: 0 0 2px !important;
+    scrollbar-width: none;
+  }
+
+  .side-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-button {
+    flex: 0 0 auto !important;
+    min-height: 34px !important;
+    padding: 0 10px !important;
+    font-size: 12px !important;
+    white-space: nowrap;
+  }
+
+  .nav-button svg,
+  .nav-button .fallback-icon {
+    width: 15px !important;
+    height: 15px !important;
+  }
+
+  .workspace {
+    width: 100% !important;
+    padding: 0 12px 24px !important;
+  }
+
+  .topbar {
+    position: relative !important;
+    top: auto !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    min-height: 0 !important;
+    margin: 0 -12px 16px !important;
+    padding: 13px 12px !important;
+  }
+
+  .topbar .eyebrow {
+    margin-bottom: 3px !important;
+    font-size: 9px !important;
+  }
+
+  .topbar h1,
+  h1 {
+    font-size: clamp(20px, 6vw, 23px) !important;
+    line-height: 1.15 !important;
+  }
+
+  h2 {
+    font-size: 17px !important;
+  }
+
+  .topbar-actions {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .search-box {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    min-height: 42px !important;
+  }
+
+  .danger-button {
+    grid-column: 1 / -1 !important;
+  }
+
+  .primary-button,
+  .secondary-button,
+  .danger-button,
+  .icon-button {
+    min-height: 42px !important;
+  }
+
+  .content-area {
+    width: 100% !important;
+    gap: 16px !important;
+  }
+
+  .kpi-grid,
+  .finance-grid,
+  .trip-grid,
+  .two-column {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .kpi-card {
+    min-height: 102px !important;
+    padding: 16px !important;
+  }
+
+  .kpi-card strong {
+    font-size: 24px !important;
+  }
+
+  .panel {
+    padding: 16px !important;
+    border-radius: 11px !important;
+  }
+
+  .panel-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 11px !important;
+    margin-bottom: 14px !important;
+  }
+
+  .panel-header .select,
+  .filters select {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  .filters {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  .record-card,
+  .tracking-stage,
+  .finance-card {
+    padding: 14px !important;
+  }
+
+  .record-topline {
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+
+  .record-actions {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  .record-actions .primary-button,
+  .record-actions .secondary-button,
+  .record-actions .danger-button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  .tag-row {
+    gap: 6px !important;
+  }
+
+  .control-map {
+    min-height: 240px !important;
+  }
+
+  .map-pin {
+    max-width: 150px;
+    font-size: 11px !important;
+  }
+
+  .table-wrap {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto !important;
+  }
+
+  .table-wrap table {
+    min-width: 720px;
+  }
+
+  .table-wrap th,
+  .table-wrap td {
+    white-space: normal;
+  }
+
+  .timeline-item {
+    grid-template-columns: 76px minmax(0, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .form-grid .span-2 {
+    grid-column: auto !important;
+  }
+
+  .modal,
+  dialog {
+    width: calc(100vw - 20px) !important;
+    max-width: calc(100vw - 20px) !important;
+    max-height: calc(100dvh - 20px) !important;
+    margin: 10px auto !important;
+    border-radius: 11px !important;
+  }
+
+  .modal-header {
+    gap: 10px !important;
+  }
+
+  .modal-actions {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  .modal-actions button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}
+
+/* MOBILE COMPACTO — até 420px */
+@media (max-width: 420px) {
+  .workspace {
+    padding-inline: 10px !important;
+  }
+
+  .topbar {
+    margin-inline: -10px !important;
+    padding-inline: 10px !important;
+  }
+
+  .topbar-actions {
+    grid-template-columns: 1fr !important;
+  }
+
+  .search-box,
+  .danger-button {
+    grid-column: auto !important;
+  }
+
+  .topbar-actions .primary-button,
+  .topbar-actions .secondary-button,
+  .topbar-actions .danger-button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  .panel,
+  .kpi-card,
+  .record-card,
+  .tracking-stage,
+  .finance-card {
+    border-radius: 9px !important;
+  }
+
+  .control-map {
+    min-height: 220px !important;
+  }
+}
+
+/* ORIENTAÇÃO HORIZONTAL EM CELULARES */
+@media (max-height: 520px) and (orientation: landscape) and (max-width: 950px) {
+  .sidebar {
+    position: relative !important;
+  }
+
+  .brand-lockup {
+    display: none !important;
+  }
+
+  .workspace {
+    padding-top: 0 !important;
+  }
+
+  .topbar {
+    position: relative !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .side-nav,
+  .table-wrap {
+    scroll-behavior: auto !important;
+  }
+}
