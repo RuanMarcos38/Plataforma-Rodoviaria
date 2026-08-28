@@ -28,7 +28,7 @@ const views = {
   trips: "Central de viagens e rastreamento",
   fiscal: "Operação fiscal e regulatória",
   finance: "Financeiro e pagamentos protegidos",
-  admin: "Painel administrador"
+  admin: "Painel administrativo"
 };
 
 const statusLabels = {
@@ -407,33 +407,9 @@ function renderKpis() {
   `;
 }
 
-function renderControlHero() {
-  const activeTenant = state.bootstrap.tenants.find((tenant) => tenant.id === state.tenantId);
-  const brandName = activeTenant?.brand?.appName || "R2R Logística";
-
-  return `
-    <section class="control-hero" aria-label="Logística invisível">
-      <div class="hero-brand">
-        <span class="hero-brand-mark" aria-hidden="true"><span></span></span>
-        <strong>${escapeHtml(brandName)}</strong>
-      </div>
-      <div class="hero-copy">
-        <h2><span>Logística</span><span>invisível</span></h2>
-        <p>O que acontece enquanto sua carga viaja?</p>
-      </div>
-      <div class="hero-insight">
-        <span class="hero-insight-icon"><i data-lucide="package-search"></i></span>
-        <p>Por trás de cada entrega, há uma operação monitorada minuto a minuto.</p>
-      </div>
-      <div class="hero-corner" aria-hidden="true"></div>
-    </section>
-  `;
-}
-
 function renderControl() {
   const pins = state.trips.slice(0, 3);
   elements.content.innerHTML = `
-    ${renderControlHero()}
     ${renderKpis()}
     <section class="two-column">
       <div class="panel">
