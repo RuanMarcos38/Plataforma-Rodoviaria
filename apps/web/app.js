@@ -418,7 +418,7 @@ function renderControlHero() {
         <strong>${escapeHtml(brandName)}</strong>
       </div>
       <div class="hero-copy">
-        <h2><span>Logística</span><span>Invisível</span></h2>
+        <h2><span>Logística</span><span>invisível</span></h2>
         <p>O que acontece enquanto sua carga viaja?</p>
       </div>
       <div class="hero-insight">
