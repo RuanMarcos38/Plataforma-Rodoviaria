@@ -17,283 +17,87 @@
     <div class="app-shell">
       <aside class="sidebar" aria-label="Navegação principal">
         <div class="brand-lockup">
-          <div class="brand-mark" aria-hidden="true">
-            <span></span>
-          </div>
-          <div>
-            <strong id="brandName">R2R Logística</strong>
-            <small>Operação rodoviária nacional</small>
-          </div>
+          <div class="brand-mark" aria-hidden="true"><span></span></div>
+          <div><strong id="brandName">R2R Logística</strong><small>Operação rodoviária nacional</small></div>
         </div>
-
         <label class="field-label" for="tenantSelect">Empresa</label>
         <select id="tenantSelect" class="select"></select>
-
         <label class="field-label" for="roleSelect">Perfil</label>
         <select id="roleSelect" class="select"></select>
-
         <nav class="side-nav">
-          <button class="nav-button is-active" data-view="control" type="button">
-            <i data-lucide="radar"></i>
-            Torre
-          </button>
-          <button class="nav-button" data-view="marketplace" type="button">
-            <i data-lucide="package-search"></i>
-            Mercado
-          </button>
-          <button class="nav-button" data-view="matching" type="button">
-            <i data-lucide="route"></i>
-            Alocação
-          </button>
-          <button class="nav-button" data-view="trips" type="button">
-            <i data-lucide="truck"></i>
-            Viagens
-          </button>
-          <button class="nav-button" data-view="fiscal" type="button">
-            <i data-lucide="file-check-2"></i>
-            Fiscal
-          </button>
-          <button class="nav-button" data-view="finance" type="button">
-            <i data-lucide="landmark"></i>
-            Financeiro
-          </button>
-          <button class="nav-button" data-view="admin" type="button">
-            <i data-lucide="settings"></i>
-            Administração
-          </button>
+          <button class="nav-button is-active" data-view="control" type="button"><i data-lucide="radar"></i>Torre</button>
+          <button class="nav-button" data-view="marketplace" type="button"><i data-lucide="package-search"></i>Mercado</button>
+          <button class="nav-button" data-view="matching" type="button"><i data-lucide="route"></i>Alocação</button>
+          <button class="nav-button" data-view="trips" type="button"><i data-lucide="truck"></i>Viagens</button>
+          <button class="nav-button" data-view="fiscal" type="button"><i data-lucide="file-check-2"></i>Fiscal</button>
+          <button class="nav-button" data-view="finance" type="button"><i data-lucide="landmark"></i>Financeiro</button>
+          <button class="nav-button" data-view="admin" type="button"><i data-lucide="settings"></i>Administração</button>
         </nav>
-
-        <div class="sidebar-footer">
-          <span class="status-dot"></span>
-          API local em homologação
-        </div>
+        <div class="sidebar-footer"><span class="status-dot"></span>API local em homologação</div>
       </aside>
-
       <main class="workspace">
         <header class="topbar">
-          <div>
-            <p class="eyebrow">Operação rodoviária integrada</p>
-            <h1 id="pageTitle">Torre de controle nacional</h1>
-          </div>
-
+          <div><p class="eyebrow">Operação rodoviária integrada</p><h1 id="pageTitle">Torre de controle nacional</h1></div>
           <div class="topbar-actions">
-            <label class="search-box" for="globalSearch">
-              <i data-lucide="search"></i>
-              <input id="globalSearch" type="search" placeholder="Buscar frete, rota, motorista..." />
-            </label>
-            <button id="newFreightButton" class="primary-button" type="button">
-              <i data-lucide="plus"></i>
-              Nova carga
-            </button>
-            <button id="newDriverButton" class="secondary-button" type="button">
-              <i data-lucide="badge-plus"></i>
-              Motorista
-            </button>
-            <button id="incidentButton" class="danger-button" type="button">
-              <i data-lucide="siren"></i>
-              Emergência
-            </button>
+            <label class="search-box" for="globalSearch"><i data-lucide="search"></i><input id="globalSearch" type="search" placeholder="Buscar frete, rota, motorista..." /></label>
+            <button id="newFreightButton" class="primary-button" type="button"><i data-lucide="plus"></i>Nova carga</button>
+            <button id="newDriverButton" class="secondary-button" type="button"><i data-lucide="badge-plus"></i>Motorista</button>
+            <button id="incidentButton" class="danger-button" type="button"><i data-lucide="siren"></i>Emergência</button>
           </div>
         </header>
-
         <section id="messageArea" class="message-area" aria-live="polite"></section>
         <section id="content" class="content-area"></section>
       </main>
     </div>
-
     <dialog id="freightDialog" class="modal">
       <form id="freightForm" method="dialog">
-        <div class="modal-header">
-          <div>
-            <p class="eyebrow">Publicação operacional</p>
-            <h2>Nova carga</h2>
-          </div>
-          <button class="icon-button" type="button" data-close-dialog="freightDialog" aria-label="Fechar">
-            <i data-lucide="x"></i>
-          </button>
-        </div>
-
+        <div class="modal-header"><div><p class="eyebrow">Publicação operacional</p><h2>Nova carga</h2></div><button class="icon-button" type="button" data-close-dialog="freightDialog" aria-label="Fechar"><i data-lucide="x"></i></button></div>
         <div class="form-grid">
-          <label>
-            Embarcador
-            <input name="shipper" required value="Cliente Nacional" />
-          </label>
-          <label>
-            Carga
-            <input name="cargo" required value="Carga seca paletizada" />
-          </label>
-          <label>
-            Origem
-            <input name="originCity" required value="Campinas" />
-          </label>
-          <label>
-            UF origem
-            <input name="originUf" required maxlength="2" value="SP" />
-          </label>
-          <label>
-            Destino
-            <input name="destinationCity" required value="Belo Horizonte" />
-          </label>
-          <label>
-            UF destino
-            <input name="destinationUf" required maxlength="2" value="MG" />
-          </label>
-          <label>
-            Peso kg
-            <input name="weightKg" type="number" required min="1" value="12000" />
-          </label>
-          <label>
-            Valor da mercadoria
-            <input name="cargoValue" type="number" required min="1" value="220000" />
-          </label>
-          <label>
-            Veículo
-            <select name="requiredVehicle">
-              <option value="truck">Truck</option>
-              <option value="toco">Toco</option>
-              <option value="carreta">Carreta</option>
-            </select>
-          </label>
-          <label>
-            Carroceria
-            <select name="requiredBody">
-              <option value="bau">Baú</option>
-              <option value="sider">Sider</option>
-              <option value="refrigerado">Refrigerado</option>
-              <option value="graneleiro">Graneleiro</option>
-            </select>
-          </label>
-          <label>
-            Distância km
-            <input name="distanceKm" type="number" min="1" value="580" />
-          </label>
-          <label>
-            Pedágios
-            <input name="tolls" type="number" min="0" value="390" />
-          </label>
+          <label>Embarcador<input name="shipper" required value="Cliente Nacional" /></label>
+          <label>Carga<input name="cargo" required value="Carga seca paletizada" /></label>
+          <label>Origem<input name="originCity" required value="Campinas" /></label>
+          <label>UF origem<input name="originUf" required maxlength="2" value="SP" /></label>
+          <label>Destino<input name="destinationCity" required value="Belo Horizonte" /></label>
+          <label>UF destino<input name="destinationUf" required maxlength="2" value="MG" /></label>
+          <label>Peso kg<input name="weightKg" type="number" required min="1" value="12000" /></label>
+          <label>Valor da mercadoria<input name="cargoValue" type="number" required min="1" value="220000" /></label>
+          <label>Veículo<select name="requiredVehicle"><option value="truck">Truck</option><option value="toco">Toco</option><option value="carreta">Carreta</option></select></label>
+          <label>Carroceria<select name="requiredBody"><option value="bau">Baú</option><option value="sider">Sider</option><option value="refrigerado">Refrigerado</option><option value="graneleiro">Graneleiro</option></select></label>
+          <label>Distância km<input name="distanceKm" type="number" min="1" value="580" /></label>
+          <label>Pedágios<input name="tolls" type="number" min="0" value="390" /></label>
         </div>
-
-        <div class="modal-actions">
-          <button class="secondary-button" type="button" data-close-dialog="freightDialog">Cancelar</button>
-          <button class="primary-button" type="submit">
-            <i data-lucide="send"></i>
-            Publicar carga
-          </button>
-        </div>
+        <div class="modal-actions"><button class="secondary-button" type="button" data-close-dialog="freightDialog">Cancelar</button><button class="primary-button" type="submit"><i data-lucide="send"></i>Publicar carga</button></div>
       </form>
     </dialog>
-
     <dialog id="driverDialog" class="modal">
       <form id="driverForm" method="dialog">
-        <div class="modal-header">
-          <div>
-            <p class="eyebrow">Cadastro operacional</p>
-            <h2>Novo motorista</h2>
-          </div>
-          <button class="icon-button" type="button" data-close-dialog="driverDialog" aria-label="Fechar">
-            <i data-lucide="x"></i>
-          </button>
-        </div>
-
+        <div class="modal-header"><div><p class="eyebrow">Cadastro operacional</p><h2>Novo motorista</h2></div><button class="icon-button" type="button" data-close-dialog="driverDialog" aria-label="Fechar"><i data-lucide="x"></i></button></div>
         <div class="form-grid">
-          <label>
-            Nome
-            <input name="name" required value="Motorista parceiro" />
-          </label>
-          <label>
-            Telefone
-            <input name="phone" value="+55 11 90000-0000" />
-          </label>
-          <label>
-            Cidade
-            <input name="city" required value="Campinas" />
-          </label>
-          <label>
-            UF
-            <input name="uf" required maxlength="2" value="SP" />
-          </label>
-          <label>
-            Placa
-            <input name="vehiclePlate" required value="ABC1D23" />
-          </label>
-          <label>
-            Distância até coleta
-            <input name="distanceToPickupKm" type="number" min="0" value="24" />
-          </label>
-          <label>
-            Veículo
-            <select name="vehicleType">
-              <option value="truck">Truck</option>
-              <option value="toco">Toco</option>
-              <option value="carreta">Carreta</option>
-            </select>
-          </label>
-          <label>
-            Carroceria
-            <select name="bodyType">
-              <option value="bau">Baú</option>
-              <option value="sider">Sider</option>
-              <option value="refrigerado">Refrigerado</option>
-              <option value="graneleiro">Graneleiro</option>
-            </select>
-          </label>
+          <label>Nome<input name="name" required value="Motorista parceiro" /></label>
+          <label>Telefone<input name="phone" value="+55 11 90000-0000" /></label>
+          <label>Cidade<input name="city" required value="Campinas" /></label>
+          <label>UF<input name="uf" required maxlength="2" value="SP" /></label>
+          <label>Placa<input name="vehiclePlate" required value="ABC1D23" /></label>
+          <label>Distância até coleta<input name="distanceToPickupKm" type="number" min="0" value="24" /></label>
+          <label>Veículo<select name="vehicleType"><option value="truck">Truck</option><option value="toco">Toco</option><option value="carreta">Carreta</option></select></label>
+          <label>Carroceria<select name="bodyType"><option value="bau">Baú</option><option value="sider">Sider</option><option value="refrigerado">Refrigerado</option><option value="graneleiro">Graneleiro</option></select></label>
         </div>
-
-        <div class="modal-actions">
-          <button class="secondary-button" type="button" data-close-dialog="driverDialog">Cancelar</button>
-          <button class="primary-button" type="submit">
-            <i data-lucide="save"></i>
-            Cadastrar
-          </button>
-        </div>
+        <div class="modal-actions"><button class="secondary-button" type="button" data-close-dialog="driverDialog">Cancelar</button><button class="primary-button" type="submit"><i data-lucide="save"></i>Cadastrar</button></div>
       </form>
     </dialog>
-
     <dialog id="incidentDialog" class="modal">
       <form id="incidentForm" method="dialog">
-        <div class="modal-header">
-          <div>
-            <p class="eyebrow">Torre de controle</p>
-            <h2>Registrar emergência</h2>
-          </div>
-          <button class="icon-button" type="button" data-close-dialog="incidentDialog" aria-label="Fechar">
-            <i data-lucide="x"></i>
-          </button>
-        </div>
-
+        <div class="modal-header"><div><p class="eyebrow">Torre de controle</p><h2>Registrar emergência</h2></div><button class="icon-button" type="button" data-close-dialog="incidentDialog" aria-label="Fechar"><i data-lucide="x"></i></button></div>
         <div class="form-grid">
-          <label>
-            Viagem
-            <select id="incidentTripSelect" name="tripId"></select>
-          </label>
-          <label>
-            Tipo
-            <select name="type">
-              <option value="pane">Pane</option>
-              <option value="roubo">Roubo</option>
-              <option value="acidente">Acidente</option>
-              <option value="documental">Problema documental</option>
-              <option value="carga">Problema com carga</option>
-            </select>
-          </label>
-          <label class="span-2">
-            Mensagem
-            <input name="message" value="Emergência registrada pela torre de controle" />
-          </label>
+          <label>Viagem<select id="incidentTripSelect" name="tripId"></select></label>
+          <label>Tipo<select name="type"><option value="pane">Pane</option><option value="roubo">Roubo</option><option value="acidente">Acidente</option><option value="documental">Problema documental</option><option value="carga">Problema com carga</option></select></label>
+          <label class="span-2">Mensagem<input name="message" value="Emergência registrada pela torre de controle" /></label>
         </div>
-
-        <div class="modal-actions">
-          <button class="secondary-button" type="button" data-close-dialog="incidentDialog">Cancelar</button>
-          <button class="danger-button" type="submit">
-            <i data-lucide="shield-alert"></i>
-            Registrar
-          </button>
-        </div>
+        <div class="modal-actions"><button class="secondary-button" type="button" data-close-dialog="incidentDialog">Cancelar</button><button class="danger-button" type="submit"><i data-lucide="shield-alert"></i>Registrar</button></div>
       </form>
     </dialog>
-
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
-
+    <script src="preview-api.js"></script>
     <script src="app.js"></script>
   </body>
 </html>
