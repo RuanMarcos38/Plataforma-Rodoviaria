@@ -1,3 +1,4 @@
 /* Plataforma Rodoviária — entrada da identidade visual aprovada.
-   A implementação detalhada permanece isolada em reference-layout.css para rollback simples. */
+   As camadas permanecem isoladas para rollback simples e seguro. */
 @import url("reference-layout.css");
+@import url("responsive-layout.css");
