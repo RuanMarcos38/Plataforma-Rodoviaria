@@ -1,0 +1,67 @@
+name: Prompt V2 Baseline
+
+on:
+  push:
+    branches:
+      - feat/prompt-v2-audit-foundation-20260828
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Enforce frozen frontend baseline
+        run: git diff --exit-code 79dd12d16965c2c933375f201db81282f808846b -- apps/web
+
+      - name: Automated tests
+        run: npm test
+
+      - name: Start application
+        run: |
+          npm start > /tmp/plataforma.log 2>&1 &
+          echo $! > /tmp/plataforma.pid
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:3000/api/health >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/plataforma.log
+          exit 1
+
+      - name: Install Chromium
+        run: npx --yes playwright@1.55.0 install --with-deps chromium
+
+      - name: Capture frozen UI baseline
+        run: |
+          npx --yes playwright@1.55.0 screenshot --browser=chromium --viewport-size='1600,1000' --full-page http://127.0.0.1:3000/ baseline-desktop.png
+          npx --yes playwright@1.55.0 screenshot --browser=chromium --viewport-size='900,1100' --full-page http://127.0.0.1:3000/ baseline-tablet.png
+          npx --yes playwright@1.55.0 screenshot --browser=chromium --viewport-size='390,844' --full-page http://127.0.0.1:3000/ baseline-mobile.png
+
+      - name: API smoke test
+        run: |
+          curl -fsS http://127.0.0.1:3000/api/health >/dev/null
+          curl -fsS -H 'x-tenant-id: tenant-rodonorte' -H 'x-role: CARRIER_MANAGER' http://127.0.0.1:3000/api/dashboard >/dev/null
+
+      - name: Upload baseline screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: prompt-v2-visual-baseline
+          path: |
+            baseline-desktop.png
+            baseline-tablet.png
+            baseline-mobile.png
+          retention-days: 7

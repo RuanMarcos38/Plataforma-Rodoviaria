@@ -4,6 +4,8 @@ const { estimateFreightCost } = require("./calculations");
 
 const COLLECTIONS = [
   "tenants",
+  "customers",
+  "vehicles",
   "freights",
   "drivers",
   "trips",

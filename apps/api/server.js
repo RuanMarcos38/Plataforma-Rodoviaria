@@ -8,6 +8,7 @@ const { createFileStore } = require("../../packages/domain/store");
 const { STATUS_LABELS, ALLOWED_TRANSITIONS, nextStatuses, assertTransition } = require("../../packages/domain/status-machine");
 const { ROLES, hasPermission, assertPermission } = require("../../packages/domain/rbac");
 const { estimateFreightCost, matchDrivers, computeDashboard } = require("../../packages/domain/calculations");
+const { validateCustomerPayload, validateVehiclePayload } = require("../../packages/domain/master-data");
 
 const ROOT = path.resolve(__dirname, "..", "..");
 loadEnvFile(path.join(ROOT, ".env"));
@@ -249,12 +250,76 @@ function listFreights(tenantId, searchParams) {
   });
 }
 
+function listCustomers(tenantId, searchParams) {
+  const query = (searchParams.get("q") || "").trim().toLowerCase();
+  return data.customers.filter((customer) => {
+    if (customer.tenantId !== tenantId) return false;
+    if (!query) return true;
+    return [customer.id, customer.name, customer.legalName, customer.tradeName, customer.cnpj, customer.city, customer.uf]
+      .join(" ")
+      .toLowerCase()
+      .includes(query);
+  });
+}
+
+function listVehicles(tenantId, searchParams) {
+  const query = (searchParams.get("q") || "").trim().toLowerCase();
+  const status = searchParams.get("status") || "all";
+  return data.vehicles.filter((vehicle) => {
+    if (vehicle.tenantId !== tenantId) return false;
+    if (status !== "all" && vehicle.status !== status) return false;
+    if (!query) return true;
+    return [vehicle.id, vehicle.plate, vehicle.type, vehicle.bodyType, vehicle.brand, vehicle.model, vehicle.ownerName]
+      .join(" ")
+      .toLowerCase()
+      .includes(query);
+  });
+}
+
 function validateFreight(payload) {
   const required = ["shipper", "originCity", "originUf", "destinationCity", "destinationUf", "cargo", "weightKg", "cargoValue"];
   const missing = required.filter((field) => !payload[field]);
   if (missing.length) {
     throw new Error(`Campos obrigatórios ausentes: ${missing.join(", ")}`);
   }
+}
+
+function createCustomer(tenantId, role, payload) {
+  const normalized = validateCustomerPayload(payload);
+  if (normalized.cnpj && data.customers.some((item) => item.tenantId === tenantId && item.cnpj === normalized.cnpj)) {
+    throw new Error("Já existe cliente com este CNPJ nesta empresa");
+  }
+
+  const customer = {
+    id: nextId("CUS", data.customers, 4),
+    tenantId,
+    ...normalized,
+    createdAt: safeNow(),
+    updatedAt: safeNow()
+  };
+
+  data.customers.unshift(customer);
+  audit(tenantId, role, "customer:create", customer.id);
+  return customer;
+}
+
+function createVehicle(tenantId, role, payload) {
+  const normalized = validateVehiclePayload(payload);
+  if (data.vehicles.some((item) => item.tenantId === tenantId && item.plate === normalized.plate)) {
+    throw new Error("Já existe veículo com esta placa nesta empresa");
+  }
+
+  const vehicle = {
+    id: nextId("VEH", data.vehicles, 4),
+    tenantId,
+    ...normalized,
+    createdAt: safeNow(),
+    updatedAt: safeNow()
+  };
+
+  data.vehicles.unshift(vehicle);
+  audit(tenantId, role, "vehicle:create", vehicle.id);
+  return vehicle;
 }
 
 function createFreight(tenantId, role, payload) {
@@ -564,6 +629,30 @@ async function handleApi(request, response, url) {
     if (url.pathname === "/api/dashboard") {
       assertPermission(role, "dashboard:read");
       return sendJson(response, 200, computeDashboard(tenantId, data));
+    }
+
+    if (url.pathname === "/api/v1/customers" && request.method === "GET") {
+      assertPermission(role, "customer:read");
+      return sendJson(response, 200, listCustomers(tenantId, url.searchParams));
+    }
+
+    if (url.pathname === "/api/v1/customers" && request.method === "POST") {
+      assertPermission(role, "customer:create");
+      const payload = await readBody(request);
+      const customer = idempotent(request, payload.idempotencyKey, () => createCustomer(tenantId, role, payload));
+      return sendJson(response, 201, customer);
+    }
+
+    if (url.pathname === "/api/v1/vehicles" && request.method === "GET") {
+      assertPermission(role, "vehicle:read");
+      return sendJson(response, 200, listVehicles(tenantId, url.searchParams));
+    }
+
+    if (url.pathname === "/api/v1/vehicles" && request.method === "POST") {
+      assertPermission(role, "vehicle:create");
+      const payload = await readBody(request);
+      const vehicle = idempotent(request, payload.idempotencyKey, () => createVehicle(tenantId, role, payload));
+      return sendJson(response, 201, vehicle);
     }
 
     if (url.pathname === "/api/freights" && request.method === "GET") {

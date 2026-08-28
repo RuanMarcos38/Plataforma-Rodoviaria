@@ -48,6 +48,85 @@ async function run() {
     const html = await fetch(`${baseUrl}/`).then((response) => response.text());
     assert.ok(html.includes("Torre de controle nacional"));
 
+    const customerPayload = {
+      name: "Cliente API V2",
+      legalName: "Cliente API V2 Ltda",
+      cnpj: "12.345.678/0001-95",
+      city: "Campinas",
+      uf: "SP",
+      email: "operacao@cliente.test"
+    };
+    const createdCustomer = await request(baseUrl, "/api/v1/customers", {
+      method: "POST",
+      headers: { "Idempotency-Key": "http-customer-001" },
+      body: JSON.stringify(customerPayload)
+    });
+    assert.equal(createdCustomer.response.status, 201);
+    assert.ok(createdCustomer.body.id.startsWith("CUS-"));
+    assert.equal(createdCustomer.body.cnpj, "12345678000195");
+
+    const customerList = await request(baseUrl, "/api/v1/customers?q=Cliente%20API");
+    assert.equal(customerList.response.status, 200);
+    assert.ok(customerList.body.some((item) => item.id === createdCustomer.body.id));
+
+    const duplicateCustomer = await request(baseUrl, "/api/v1/customers", {
+      method: "POST",
+      headers: { "Idempotency-Key": "http-customer-duplicate" },
+      body: JSON.stringify(customerPayload)
+    });
+    assert.equal(duplicateCustomer.response.status, 400);
+
+    const vehiclePayload = {
+      plate: "ABC-1D23",
+      type: "truck",
+      bodyType: "bau",
+      ownerType: "proprio",
+      capacityKg: 14000,
+      axles: 4
+    };
+    const createdVehicle = await request(baseUrl, "/api/v1/vehicles", {
+      method: "POST",
+      headers: { "Idempotency-Key": "http-vehicle-001" },
+      body: JSON.stringify(vehiclePayload)
+    });
+    assert.equal(createdVehicle.response.status, 201);
+    assert.ok(createdVehicle.body.id.startsWith("VEH-"));
+    assert.equal(createdVehicle.body.plate, "ABC1D23");
+
+    const vehicleList = await request(baseUrl, "/api/v1/vehicles?status=available");
+    assert.equal(vehicleList.response.status, 200);
+    assert.ok(vehicleList.body.some((item) => item.id === createdVehicle.body.id));
+
+    const otherTenantCustomers = await request(baseUrl, "/api/v1/customers", {
+      headers: {
+        "x-tenant-id": "tenant-agrovale",
+        "x-role": "SHIPPER_OPERATOR"
+      }
+    });
+    assert.equal(otherTenantCustomers.response.status, 200);
+    assert.equal(otherTenantCustomers.body.some((item) => item.id === createdCustomer.body.id), false);
+
+    const otherTenantVehicles = await request(baseUrl, "/api/v1/vehicles", {
+      headers: {
+        "x-tenant-id": "tenant-agrovale",
+        "x-role": "SHIPPER_OPERATOR"
+      }
+    });
+    assert.equal(otherTenantVehicles.response.status, 200);
+    assert.equal(otherTenantVehicles.body.some((item) => item.id === createdVehicle.body.id), false);
+
+    const forbiddenCustomerCreate = await request(baseUrl, "/api/v1/customers", {
+      method: "POST",
+      headers: {
+        "x-tenant-id": "tenant-rodonorte",
+        "x-role": "CUSTOMER_VIEWER",
+        "Content-Type": "application/json",
+        "Idempotency-Key": "http-customer-forbidden"
+      },
+      body: JSON.stringify({ ...customerPayload, cnpj: "98765432000100" })
+    });
+    assert.equal(forbiddenCustomerCreate.response.status, 403);
+
     const freightPayload = {
       shipper: "Teste Integrado",
       originCity: "Campinas",
