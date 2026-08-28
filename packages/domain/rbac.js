@@ -16,6 +16,10 @@ const ROLES = {
       "tracking:write",
       "driver:read",
       "driver:create",
+      "customer:read",
+      "customer:create",
+      "vehicle:read",
+      "vehicle:create",
       "fiscal:read",
       "fiscal:write",
       "finance:read",
@@ -33,6 +37,8 @@ const ROLES = {
       "freight:negotiate",
       "contract:create",
       "trip:read",
+      "customer:read",
+      "vehicle:read",
       "fiscal:read",
       "finance:read"
     ]
