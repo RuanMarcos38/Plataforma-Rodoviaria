@@ -3,10 +3,11 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>R2R Logística | Torre Nacional</title>
+    <meta name="color-scheme" content="light" />
+    <title>Plataforma Rodoviária | Operação Logística</title>
     <meta
       name="description"
-      content="MVP local da Plataforma Rodoviária para mercado de fretes, TMS, rastreamento e operação fiscal."
+      content="Plataforma SaaS para operação rodoviária, mercado de fretes, rastreamento, gestão fiscal e financeira."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -125,39 +126,40 @@
         <div class="form-grid">
           <label>
             Embarcador
-            <input name="shipper" required value="Cliente Nacional" />
+            <input name="shipper" required autocomplete="organization" />
           </label>
           <label>
             Carga
-            <input name="cargo" required value="Carga seca paletizada" />
+            <input name="cargo" required />
           </label>
           <label>
             Origem
-            <input name="originCity" required value="Campinas" />
+            <input name="originCity" required autocomplete="address-level2" />
           </label>
           <label>
             UF origem
-            <input name="originUf" required maxlength="2" value="SP" />
+            <input name="originUf" required maxlength="2" autocomplete="address-level1" />
           </label>
           <label>
             Destino
-            <input name="destinationCity" required value="Belo Horizonte" />
+            <input name="destinationCity" required />
           </label>
           <label>
             UF destino
-            <input name="destinationUf" required maxlength="2" value="MG" />
+            <input name="destinationUf" required maxlength="2" />
           </label>
           <label>
             Peso kg
-            <input name="weightKg" type="number" required min="1" value="12000" />
+            <input name="weightKg" type="number" required min="1" />
           </label>
           <label>
             Valor da mercadoria
-            <input name="cargoValue" type="number" required min="1" value="220000" />
+            <input name="cargoValue" type="number" required min="1" />
           </label>
           <label>
             Veículo
-            <select name="requiredVehicle">
+            <select name="requiredVehicle" required>
+              <option value="" selected disabled>Selecione</option>
               <option value="truck">Truck</option>
               <option value="toco">Toco</option>
               <option value="carreta">Carreta</option>
@@ -165,7 +167,8 @@
           </label>
           <label>
             Carroceria
-            <select name="requiredBody">
+            <select name="requiredBody" required>
+              <option value="" selected disabled>Selecione</option>
               <option value="bau">Baú</option>
               <option value="sider">Sider</option>
               <option value="refrigerado">Refrigerado</option>
@@ -174,11 +177,11 @@
           </label>
           <label>
             Distância km
-            <input name="distanceKm" type="number" min="1" value="580" />
+            <input name="distanceKm" type="number" min="1" />
           </label>
           <label>
             Pedágios
-            <input name="tolls" type="number" min="0" value="390" />
+            <input name="tolls" type="number" min="0" />
           </label>
         </div>
 
@@ -207,31 +210,32 @@
         <div class="form-grid">
           <label>
             Nome
-            <input name="name" required value="Motorista parceiro" />
+            <input name="name" required autocomplete="name" />
           </label>
           <label>
             Telefone
-            <input name="phone" value="+55 11 90000-0000" />
+            <input name="phone" type="tel" autocomplete="tel" />
           </label>
           <label>
             Cidade
-            <input name="city" required value="Campinas" />
+            <input name="city" required autocomplete="address-level2" />
           </label>
           <label>
             UF
-            <input name="uf" required maxlength="2" value="SP" />
+            <input name="uf" required maxlength="2" autocomplete="address-level1" />
           </label>
           <label>
             Placa
-            <input name="vehiclePlate" required value="ABC1D23" />
+            <input name="vehiclePlate" required autocapitalize="characters" />
           </label>
           <label>
             Distância até coleta
-            <input name="distanceToPickupKm" type="number" min="0" value="24" />
+            <input name="distanceToPickupKm" type="number" min="0" />
           </label>
           <label>
             Veículo
-            <select name="vehicleType">
+            <select name="vehicleType" required>
+              <option value="" selected disabled>Selecione</option>
               <option value="truck">Truck</option>
               <option value="toco">Toco</option>
               <option value="carreta">Carreta</option>
@@ -239,7 +243,8 @@
           </label>
           <label>
             Carroceria
-            <select name="bodyType">
+            <select name="bodyType" required>
+              <option value="" selected disabled>Selecione</option>
               <option value="bau">Baú</option>
               <option value="sider">Sider</option>
               <option value="refrigerado">Refrigerado</option>
@@ -273,11 +278,12 @@
         <div class="form-grid">
           <label>
             Viagem
-            <select id="incidentTripSelect" name="tripId"></select>
+            <select id="incidentTripSelect" name="tripId" required></select>
           </label>
           <label>
             Tipo
-            <select name="type">
+            <select name="type" required>
+              <option value="" selected disabled>Selecione</option>
               <option value="pane">Pane</option>
               <option value="roubo">Roubo</option>
               <option value="acidente">Acidente</option>
@@ -287,7 +293,7 @@
           </label>
           <label class="span-2">
             Mensagem
-            <input name="message" value="Emergência registrada pela torre de controle" />
+            <input name="message" required />
           </label>
         </div>
 
@@ -304,5 +310,6 @@
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     <script src="app.js"></script>
+    <script src="ui-guardrails.js"></script>
   </body>
 </html>
